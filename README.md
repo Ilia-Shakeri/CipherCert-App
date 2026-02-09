@@ -1,52 +1,54 @@
-# 🛡️ CipherCert App - Enterprise SSL Audit & Monitoring
+# 🛡️ CipherCert App
 
-![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)
-![License](https://img.shields.io/badge/license-MIT-green.svg)
-![Status](https://img.shields.io/badge/status-active-success.svg)
+![License](https://img.shields.io/badge/license-CC0--1.0-green.svg)
+![Status](https://img.shields.io/badge/status-stable-success)
 
-**CipherCert App** is a modern, cross-platform desktop application designed for real-time SSL/TLS certificate analysis, scoring, and monitoring. It combines the raw processing power of **Python** with the sleek, reactive user interface of **Electron** and **React**.
-
-> **Repo Link:** [https://github.com/Ilia-Shakeri/CipherCert-App](https://github.com/Ilia-Shakeri/CipherCert-App.git)
+> **CipherCert App** is a professional-grade desktop application designed for real-time **SSL/TLS certificate analysis**, scoring, and monitoring. It bridges the gap between raw backend performance and modern frontend aesthetics by combining a robust **Python** engine with a sleek **Electron & React** user interface.
 
 ---
 
-## 🚀 Features
+## 📊 Languages & Technologies
 
-* **Real-time SSL Scanning:** Deep analysis of SSL certificates for any domain.
-* **Security Grading:** Automated scoring algorithm (A-F) based on certificate validity, issuer, and protocol versions.
-* **Expiry Tracking:** Visual warnings for expiring or expired certificates.
-* **Historical Data:** Local database (SQLite) stores all scan history for trend analysis.
-* **Modern Dashboard:** Beautiful, dark-themed UI built with React, Tailwind CSS, and Recharts.
-* **Cross-Platform:** Runs on Windows, Linux, and macOS.
-
----
-
-## 🛠️ Tech Stack
-
-### Frontend (UI)
-* **Framework:** [Electron](https://www.electronjs.org/) & [React](https://react.dev/)
-* **Build Tool:** [Vite](https://vitejs.dev/)
-* **Styling:** [Tailwind CSS](https://tailwindcss.com/) & [Shadcn/ui](https://ui.shadcn.com/)
-* **Language:** TypeScript / JavaScript
-
-### Backend (Engine)
-* **Core:** [Python 3.10+](https://www.python.org/)
-* **API:** [FastAPI](https://fastapi.tiangolo.com/)
-* **Cryptography:** `cryptography` & `ssl` libraries
-* **Database:** SQLite (via SQLAlchemy)
+![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white)
+![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
+![Electron](https://img.shields.io/badge/Electron-191970?style=for-the-badge&logo=Electron&logoColor=white)
+![FastAPI](https://img.shields.io/badge/FastAPI-005571?style=for-the-badge&logo=fastapi)
+![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)
+![SQLite](https://img.shields.io/badge/SQLite-07405E?style=for-the-badge&logo=sqlite&logoColor=white)
 
 ---
 
-## 📦 Installation & Setup
+## 🚀 Key Features
+
+* **🔒 Deep SSL Inspection:** Analyzes certificate chains, issuers, expiry dates, and TLS versions.
+* **💯 Automated Scoring:** Proprietary algorithm that grades domains (A-F) based on security standards.
+* **📉 Trend Analysis:** Visualizes security score history over time using interactive charts.
+* **⚡ High Performance:** Python-based asynchronous engine for non-blocking network scans.
+* **💾 Local Persistence:** Automatically saves all scan history to a local SQLite database.
+* **🎨 Modern UI:** A responsive, dark-themed dashboard built with Shadcn/UI and Tailwind CSS.
+
+---
+
+## 🛠️ Architecture
+
+The application utilizes a **Client-Server** architecture running locally on the desktop:
+
+1.  **Frontend (UI):** Built with **React (Vite)** wrapped in **Electron**. It handles user interaction and data visualization.
+2.  **Backend (Engine):** A **Python (FastAPI)** server spawned automatically by Electron. It performs the heavy lifting (network scanning, crypto analysis, database management).
+
+---
+
+## 📦 Installation Guide
 
 Follow these steps to set up the development environment.
 
 ### Prerequisites
-* **Node.js** (v18 or higher)
-* **Python** (v3.10 or higher)
+* **Node.js** (v18+)
+* **Python** (v3.10+)
 * **Git**
 
-### 1. Clone the Repository
+### 1. Clone Repository
 ```bash
 git clone [https://github.com/Ilia-Shakeri/CipherCert-App.git](https://github.com/Ilia-Shakeri/CipherCert-App.git)
 cd CipherCert-App
@@ -55,7 +57,7 @@ cd CipherCert-App
 
 ### 2. Backend Setup (Python)
 
-We need to create a virtual environment for the Python engine.
+Create a virtual environment to isolate dependencies.
 
 **Windows:**
 
@@ -79,7 +81,7 @@ pip install -r requirements.txt
 
 ### 3. Frontend Setup (Node.js)
 
-Open a new terminal (or navigate back) to the frontend folder.
+Open a new terminal in the `frontend` directory.
 
 ```bash
 cd ../frontend
@@ -89,96 +91,54 @@ npm install
 
 ---
 
-## ⚡ Execution
+## ⚡ Usage & Execution
 
-The application uses `concurrently` to run the React dev server and the Electron window simultaneously. The Electron process automatically spawns the Python backend.
-
-**Run the application with a single command:**
+To run the application, you only need one command. This will concurrently start the React development server and the Electron window.
 
 ```bash
-# Inside the /frontend directory
+# Ensure you are in the /frontend directory
 npm run electron
 
 ```
 
-**What happens next?**
-
-1. Vite starts the frontend server on `http://127.0.0.1:5173`.
-2. Electron launches and automatically executes `backend/api.py`.
-3. The application window appears.
+> **Note:** The application will automatically detect your operating system and launch the correct Python backend path.
 
 ---
 
-## 📖 Usage Guide
+## ⚙️ Options & Configuration
 
-### The Dashboard
+The application is pre-configured for immediate use, but you can modify the following:
 
-* **Single Scan:** Enter a domain (e.g., `google.com`) in the top search bar and press **SCAN**.
-* **Status Cards:** View quick stats on how many domains are Secure, Warning, or Expired.
-* **Visual Charts:** See the trend of security scores over time.
+* **Port Configuration:**
+* Frontend runs on `http://127.0.0.1:5173`.
+* Backend API runs on `http://127.0.0.1:8000`.
 
-### Scan History
 
-* Navigate to the history section to view a log of all previous scans.
-* Data is persisted locally in `backend/data/ciphercert_v2.db`.
+* **Database:**
+* Data is stored in `backend/data/ciphercert_v2.db`.
+* Delete this file to reset your scan history.
 
-### Application Options
 
-* **Dark/Light Mode:** Toggle the application theme via the sidebar (if enabled).
-* **Export:** (Upcoming) Export scan results to PDF or Excel.
-
----
-
-## 📂 Project Structure
-
-```text
-CipherCert-App/
-├── backend/                # Python Logic
-│   ├── api.py              # FastAPI Server entry point
-│   ├── engine.py           # SSL Scanning Logic
-│   ├── models.py           # Database Models
-│   ├── data/               # SQLite Database storage
-│   └── requirements.txt    # Python dependencies
-│
-├── frontend/               # UI Logic
-│   ├── electron-main.js    # Electron Main Process
-│   ├── src/                # React Source Code
-│   │   ├── components/     # UI Components
-│   │   └── assets/         # Images & Icons
-│   ├── package.json        # Node dependencies
-│   └── vite.config.ts      # Vite Configuration
-│
-└── README.md
-
-```
 
 ---
 
 ## 🔧 Troubleshooting
 
-**1. "Python not found" error:**
-Ensure you have created the `venv` folder inside the `backend` directory. The application looks for the Python executable specifically at:
-
-* Windows: `backend/venv/Scripts/python.exe`
-* Linux: `backend/venv/bin/python`
-
-**2. White screen on startup:**
-Ensure ports are not blocked. The app uses port **5173** (Frontend) and **8000** (Backend). If the screen remains white, check the console `Ctrl+Shift+I` for errors.
-
-**3. "Address already in use":**
-If you restart the app frequently, a Python process might remain running. Manually kill any `python` or `uvicorn` processes in your task manager.
+| Issue | Solution |
+| --- | --- |
+| **White Screen on Start** | Ensure the React server is running on port `5173`. Check console logs (`Ctrl+Shift+I`) for connection errors. |
+| **"Python not found"** | Verify that the `venv` folder exists in the `backend` directory and contains Python. |
+| **Scan Failed / API Error** | Check if port `8000` is occupied. Kill any rogue `python.exe` processes in Task Manager. |
 
 ---
 
-## 🤝 Contributing
+## 📄 License
 
-Contributions are welcome! Please follow these steps:
+This project is dedicated to the public domain under the **CC0 1.0 Universal** license.
 
-1. Fork the repository.
-2. Create a new branch (`git checkout -b feature/NewFeature`).
-3. Commit your changes.
-4. Push to the branch.
-5. Open a Pull Request.
+You can copy, modify, distribute, and perform the work, even for commercial purposes, all without asking permission.
+
+[View Full License](https://creativecommons.org/publicdomain/zero/1.0/)
 
 ---
 
@@ -187,4 +147,3 @@ Contributions are welcome! Please follow these steps:
 **Ilia Shakeri**
 
 * GitHub: [@Ilia-Shakeri](https://www.google.com/search?q=https://github.com/Ilia-Shakeri)
-
