@@ -31,23 +31,32 @@ def format_result(report):
         "Expired": "expired",
         "Warning": "warning",
         "Critical": "expired", 
-        "Connection Failed": "expired"
+        "Connection Failed": "expired",
+        "Error": "expired"
     }
     
-    # هندل کردن تاریخ انقضا برای نمایش
+    # فرمت تاریخ انقضا
     try:
-        expiry_date_str = (datetime.now() + timedelta(days=report.days_remaining)).strftime("%b %d, %Y")
+        if hasattr(report, 'days_remaining') and report.days_remaining is not None:
+            expiry_date_str = (datetime.now() + timedelta(days=report.days_remaining)).strftime("%b %d, %Y")
+        else:
+            expiry_date_str = "Unknown"
     except:
         expiry_date_str = "Unknown"
 
+    scan_time = "Just now"
+    if hasattr(report, 'scan_date') and report.scan_date:
+        scan_time = report.scan_date.strftime("%Y-%m-%d %H:%M:%S")
+
     return {
-        "id": str(report.domain) + str(datetime.now().timestamp()), # ID یونیک
+        "id": getattr(report, 'id', str(datetime.now().timestamp())), 
         "domain": report.domain,
         "status": status_map.get(report.ssl_status, "warning"),
         "issuer": report.issuer,
         "expiryDate": expiry_date_str,
         "grade": report.grade,
-        "score": report.score
+        "score": report.score,
+        "timestamp": scan_time 
     }
 
 @app.post("/api/scan")
