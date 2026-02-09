@@ -38,7 +38,7 @@ DB_FOLDER = os.path.join(os.path.dirname(__file__), "data")
 if not os.path.exists(DB_FOLDER):
     os.makedirs(DB_FOLDER)
 
-DATABASE_URL = f"sqlite:///{os.path.join(DB_FOLDER, 'ciphercert_v2.db')}"
+DATABASE_URL = f"sqlite:///{os.path.join(DB_FOLDER, 'ciphercert.db')}"
 
 # Sync Engine
 engine = create_engine(DATABASE_URL, echo=False)

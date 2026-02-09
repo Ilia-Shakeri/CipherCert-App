@@ -45,3 +45,7 @@ Thumbs.db
 # --- Electron Specific ---
 frontend/dist/
 frontend/release/
+
+# --- Code dumper ---
+code_dumper.py
+full_project_code.txt
