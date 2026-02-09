@@ -13,7 +13,9 @@ interface StatusCardProps {
 export function StatusCard({ title, value, percentage, icon: Icon, color, isDark }: StatusCardProps) {
   return (
     <div 
-      className="rounded-2xl p-6 border relative overflow-hidden group transition-all duration-300 hover:scale-105"
+      // Added outline-none and ring-0 to prevent square focus halo
+      className="rounded-2xl p-6 border relative overflow-hidden group transition-all duration-300 hover:scale-105 outline-none focus:ring-0 focus:outline-none"
+      tabIndex={-1} // Prevents focus if clicked, further ensuring no square halo
       style={{
         background: isDark 
           ? "rgba(15, 23, 42, 0.5)" 

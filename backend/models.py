@@ -33,7 +33,6 @@ class ScanResult(Base):
     error_msg = Column(String, nullable=True)
 
 # --- Database Setup ---
-# دیتابیس رو داخل پوشه backend/data میسازیم که مرتب باشه
 DB_FOLDER = os.path.join(os.path.dirname(__file__), "data")
 if not os.path.exists(DB_FOLDER):
     os.makedirs(DB_FOLDER)
@@ -77,5 +76,19 @@ def get_all_history():
     except Exception as e:
         print(f"Fetch Error: {e}")
         return []
+    finally:
+        session.close()
+
+def clear_all_history():
+    """Deletes all records from the scan_results table."""
+    session = SessionLocal()
+    try:
+        session.query(ScanResult).delete()
+        session.commit()
+        return True
+    except Exception as e:
+        print(f"Clear DB Error: {e}")
+        session.rollback()
+        return False
     finally:
         session.close()

@@ -1,75 +1,71 @@
-import { motion } from "motion/react";
+import React from 'react';
 
 interface CircularProgressProps {
   percentage: number;
+  color: string;
+  isDark: boolean;
   size?: number;
   strokeWidth?: number;
-  color?: string;
-  label?: string;
-  isDark: boolean;
 }
 
-export function CircularProgress({ 
+export const CircularProgress: React.FC<CircularProgressProps> = ({ 
   percentage, 
-  size = 120, 
-  strokeWidth = 8, 
-  color = "#22D3EE",
-  label,
-  isDark 
-}: CircularProgressProps) {
+  color, 
+  isDark,
+  size = 100,
+  strokeWidth = 8 
+}) => {
   const radius = (size - strokeWidth) / 2;
   const circumference = radius * 2 * Math.PI;
   const offset = circumference - (percentage / 100) * circumference;
 
   return (
-    <div className="relative inline-flex items-center justify-center">
-      <svg width={size} height={size} className="transform -rotate-90">
-        {/* Background circle */}
+    <div 
+      className="relative flex items-center justify-center rounded-full outline-none focus:outline-none focus:ring-0"
+      style={{ width: size, height: size }}
+    >
+      {/* Background Circle */}
+      <svg
+        className="transform -rotate-90 w-full h-full overflow-visible"
+        viewBox={`0 0 ${size} ${size}`}
+      >
         <circle
           cx={size / 2}
           cy={size / 2}
           r={radius}
-          stroke={isDark ? "rgba(34, 211, 238, 0.1)" : "rgba(8, 145, 178, 0.1)"}
-          strokeWidth={strokeWidth}
           fill="none"
+          stroke={isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)"}
+          strokeWidth={strokeWidth}
         />
-        {/* Progress circle */}
-        <motion.circle
+        
+        {/* Progress Circle */}
+        <circle
           cx={size / 2}
           cy={size / 2}
           r={radius}
+          fill="none"
           stroke={color}
           strokeWidth={strokeWidth}
-          fill="none"
+          strokeDasharray={circumference}
+          strokeDashoffset={offset}
           strokeLinecap="round"
-          initial={{ strokeDashoffset: circumference }}
-          animate={{ strokeDashoffset: offset }}
-          transition={{ duration: 1, ease: "easeOut" }}
-          style={{
-            strokeDasharray: circumference,
-            filter: `drop-shadow(0 0 8px ${color})`
-          }}
+          className="transition-all duration-1000 ease-out"
+          style={{ filter: `drop-shadow(0 0 6px ${color})` }}
         />
       </svg>
-      <div className="absolute flex flex-col items-center justify-center">
+      
+      {/* Percentage Text */}
+      <div className="absolute inset-0 flex items-center justify-center">
         <span 
-          className="font-bold"
+          className="font-bold font-mono"
           style={{ 
-            fontSize: `${size / 4}px`,
+            fontSize: size * 0.25,
             color: isDark ? "#FFFFFF" : "#0F172A"
           }}
         >
           {percentage}%
         </span>
-        {label && (
-          <span 
-            className="text-xs mt-1"
-            style={{ color: isDark ? "#64748B" : "#94A3B8" }}
-          >
-            {label}
-          </span>
-        )}
       </div>
     </div>
   );
-}
+};

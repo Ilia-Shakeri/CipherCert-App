@@ -1,18 +1,18 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-# --- ایمپورت‌های مستقیم از همین پوشه ---
+# --- Direct imports from the same folder ---
 from engine import CipherEngine
-from models import init_db, save_report, get_all_history
+from models import init_db, save_report, get_all_history, clear_all_history
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 from datetime import datetime, timedelta
 
-# راه‌اندازی دیتابیس
+# Initialize DB
 init_db()
 
 app = FastAPI()
 
-# تنظیم CORS
+# CORS Setup
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -35,7 +35,7 @@ def format_result(report):
         "Error": "expired"
     }
     
-    # فرمت تاریخ انقضا
+    # Format Expiry Date
     try:
         if hasattr(report, 'days_remaining') and report.days_remaining is not None:
             expiry_date_str = (datetime.now() + timedelta(days=report.days_remaining)).strftime("%b %d, %Y")
@@ -61,7 +61,7 @@ def format_result(report):
 
 @app.post("/api/scan")
 async def scan_domain(request: ScanRequest):
-    print(f"Scanning domain: {request.domain}") # لاگ برای دیباگ
+    print(f"Scanning domain: {request.domain}") # Debug Log
     try:
         report = await engine_instance.scan_domain(request.domain)
         save_report(report)
@@ -74,6 +74,15 @@ async def scan_domain(request: ScanRequest):
 def get_history():
     results = get_all_history()
     return [format_result(r) for r in results]
+
+@app.delete("/api/history")
+def clear_history():
+    """Clears the entire scan history."""
+    success = clear_all_history()
+    if success:
+        return {"message": "History cleared successfully"}
+    else:
+        raise HTTPException(status_code=500, detail="Failed to clear history")
 
 @app.on_event("shutdown")
 async def shutdown_event():
