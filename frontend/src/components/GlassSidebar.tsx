@@ -1,6 +1,6 @@
 import { LayoutDashboard, Upload, Clock, Settings, Bell } from "lucide-react";
 import { GlassThemeToggle } from "./GlassThemeToggle";
-import logoImage from "figma:asset/ed47d08e4cabdc932b24dab349e5c3332909531e.png";
+import logoImage from "../assets/logo.png";
 
 interface MenuItem {
   id: string;
@@ -49,7 +49,10 @@ export function GlassSidebar({ activeTab, onTabChange, isDark, onThemeToggle }: 
           <img 
             src={logoImage} 
             alt="CipherCert Logo" 
-            className="w-12 h-12"
+            className="w-12 h-12 transition-all duration-300 hover:scale-110 cursor-pointer" 
+            style={{ 
+              filter: "drop-shadow(0 0 12px rgba(34, 211, 238, 0.6))" 
+            }} 
           />
           <div>
             <h1 

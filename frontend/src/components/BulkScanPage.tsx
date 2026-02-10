@@ -237,7 +237,7 @@ export function BulkScanPage({ isDark }: BulkScanPageProps) {
           {/* Big Green Check - No Box, Force Green Color */}
           <div className="flex justify-center mb-6">
              <CheckCircle2 
-                className="w-40 h-40 !text-green-500" 
+                className="w-80 h-80 !text-green-500" 
                 style={{ 
                     color: "#22c55e",
                     filter: "drop-shadow(0 0 25px rgba(34, 197, 94, 0.8))"
