@@ -271,7 +271,7 @@ export function BulkScanPage({ isDark }: BulkScanPageProps) {
                                 color: "#10B981", 
                                 textShadow: "0 0 10px rgba(16, 185, 129, 0.6)" 
                             }}>
-                            Successful
+                            Successfully scanned
                       </span>
                    </div>
                    <span className="px-4 py-1 rounded-md text-lg font-bold"
@@ -309,7 +309,7 @@ export function BulkScanPage({ isDark }: BulkScanPageProps) {
                                 color: "#EF4444", 
                                 textShadow: "0 0 10px rgba(239, 68, 68, 0.6)" 
                             }}>
-                            Failed
+                            Failed to scan
                       </span>
                    </div>
                    <span className="px-4 py-1 rounded-md text-lg font-bold"

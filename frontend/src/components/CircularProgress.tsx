@@ -12,10 +12,10 @@ export const CircularProgress: React.FC<CircularProgressProps> = ({
   percentage, 
   color, 
   isDark,
-  size = 100,
+  size = 150,
   strokeWidth = 8 
 }) => {
-  const radius = (size - strokeWidth) / 2;
+  const radius = (size - strokeWidth) / 2 - 10;
   const circumference = radius * 2 * Math.PI;
   const offset = circumference - (percentage / 100) * circumference;
 
@@ -59,7 +59,7 @@ export const CircularProgress: React.FC<CircularProgressProps> = ({
         <span 
           className="font-bold font-mono"
           style={{ 
-            fontSize: size * 0.25,
+            fontSize: size * 0.20,
             color: isDark ? "#FFFFFF" : "#0F172A"
           }}
         >
