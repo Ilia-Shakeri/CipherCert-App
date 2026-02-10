@@ -14,6 +14,9 @@ function createWindow() {
     title: "CipherCert",
     icon: path.join(__dirname, '../frontend/public/logo.ico'),
     
+    minWidth: 1280,  // The window cannot be resized narrower than 1024px
+    minHeight: 800,  // The window cannot be resized shorter than 768px
+
     // --- FORCE TITLE BAR COLOR ---
     // 'hidden' removes the native Windows frame so we can color it
     titleBarStyle: 'hidden',
