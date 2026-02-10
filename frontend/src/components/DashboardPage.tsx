@@ -1,10 +1,8 @@
 import { useState } from "react";
 import { Search, Scan, Shield, AlertTriangle, TrendingUp } from "lucide-react";
 import { StatusCard } from "./StatusCard";
-import { toast } from "sonner"; // حذف ورژن @2.0.3 برای ایمنی import
-import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { toast } from "sonner";
 
-// تعریف اینترفیس مطابق با خروجی API پایتون
 interface DomainResult {
   id: string;
   status: "secure" | "warning" | "expired";
@@ -24,17 +22,6 @@ export function DashboardPage({ isDark }: DashboardPageProps) {
   const [isScanning, setIsScanning] = useState(false);
   const [scannedDomains, setScannedDomains] = useState<DomainResult[]>([]);
 
-  // دیتای چارت فعلاً استاتیک است (می‌توانید بعداً از هیستوری بگیرید)
-  const chartData = [
-    { month: "Jan", score: 85 },
-    { month: "Feb", score: 88 },
-    { month: "Mar", score: 82 },
-    { month: "Apr", score: 90 },
-    { month: "May", score: 87 },
-    { month: "Jun", score: 92 },
-    { month: "Jul", score: 95 }
-  ];
-
   const handleScan = async () => {
     if (!domainInput.trim()) {
       toast.error("Please enter a domain or IP address");
@@ -43,15 +30,12 @@ export function DashboardPage({ isDark }: DashboardPageProps) {
     
     setIsScanning(true);
     const toastId = toast.loading("Scanning domain...");
-
     try {
-      // اتصال به API پایتون
       const response = await fetch("http://127.0.0.1:8000/api/scan", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ domain: domainInput }),
       });
-
       if (!response.ok) throw new Error("Scan failed");
 
       const result: DomainResult = await response.json();
@@ -70,7 +54,6 @@ export function DashboardPage({ isDark }: DashboardPageProps) {
 
   const secureDomains = scannedDomains.filter(d => d.status === "secure").length;
   const expiredDomains = scannedDomains.filter(d => d.status === "expired").length;
-  // محاسبه میانگین واقعی
   const avgScore = scannedDomains.length > 0 
     ? Math.round(scannedDomains.reduce((acc, curr) => acc + (curr.score || 0), 0) / scannedDomains.length)
     : 0;
@@ -139,35 +122,18 @@ export function DashboardPage({ isDark }: DashboardPageProps) {
         </div>
       </div>
 
-      {/* Status Cards */}
+      {/* Status Cards (Strictly 3 Columns & Square) */}
       <div className="grid grid-cols-3 gap-6">
         <StatusCard title="Secure Domains" value={secureDomains} percentage={scannedDomains.length ? Math.round((secureDomains / scannedDomains.length) * 100) : 0} icon={Shield} color="#22D3EE" isDark={isDark} />
         <StatusCard title="Expired / Critical" value={expiredDomains} percentage={scannedDomains.length ? Math.round((expiredDomains / scannedDomains.length) * 100) : 0} icon={AlertTriangle} color="#EF4444" isDark={isDark} />
         <StatusCard title="Avg. Security Score" value={avgScore} percentage={avgScore} icon={TrendingUp} color="#10B981" isDark={isDark} />
       </div>
 
-      {/* Chart & Table Area */}
-      <div className="rounded-2xl p-6 border" style={{ background: isDark ? "rgba(15, 23, 42, 0.5)" : "rgba(255, 255, 255, 0.5)", backdropFilter: "blur(20px)", borderColor: isDark ? "rgba(34, 211, 238, 0.2)" : "rgba(8, 145, 178, 0.2)" }}>
-        <h3 className="mb-4 font-bold" style={{ color: isDark ? "#FFFFFF" : "#0F172A", fontSize: "20px" }}>Security Score Trend</h3>
-        <ResponsiveContainer width="100%" height={300}>
-          <AreaChart data={chartData}>
-            <defs>
-              <linearGradient id="colorScore" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#22D3EE" stopOpacity={0.3} />
-                <stop offset="95%" stopColor="#22D3EE" stopOpacity={0} />
-              </linearGradient>
-            </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke={isDark ? "#1E293B" : "#E2E8F0"} />
-            <XAxis dataKey="month" stroke={isDark ? "#64748B" : "#94A3B8"} />
-            <YAxis stroke={isDark ? "#64748B" : "#94A3B8"} />
-            <Tooltip contentStyle={{ backgroundColor: isDark ? "#0F172A" : "#FFFFFF", border: `1px solid ${isDark ? "#334155" : "#E2E8F0"}`, borderRadius: "12px", color: isDark ? "#FFFFFF" : "#0F172A" }} />
-            <Area type="monotone" dataKey="score" stroke="#22D3EE" strokeWidth={3} fill="url(#colorScore)" />
-          </AreaChart>
-        </ResponsiveContainer>
-      </div>
-
       {/* Data Table */}
       <div className="rounded-2xl border overflow-hidden" style={{ background: isDark ? "rgba(15, 23, 42, 0.5)" : "rgba(255, 255, 255, 0.5)", backdropFilter: "blur(20px)", borderColor: isDark ? "rgba(34, 211, 238, 0.2)" : "rgba(8, 145, 178, 0.2)" }}>
+        <div className="p-6 border-b" style={{ borderColor: isDark ? "rgba(34, 211, 238, 0.1)" : "rgba(0,0,0,0.1)" }}>
+            <h3 className="font-bold text-xl" style={{ color: isDark ? "#FFFFFF" : "#0F172A" }}>Recent Scans</h3>
+        </div>
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
@@ -192,8 +158,9 @@ export function DashboardPage({ isDark }: DashboardPageProps) {
             </tbody>
           </table>
           {scannedDomains.length === 0 && (
-            <div className="p-8 text-center" style={{ color: isDark ? "#64748B" : "#94A3B8" }}>
-              No scans yet. Enter a domain to start.
+            <div className="p-12 text-center flex flex-col items-center justify-center gap-2" style={{ color: isDark ? "#64748B" : "#94A3B8" }}>
+               <Search className="w-10 h-10 opacity-20" />
+               <p>No scans in this session yet. Enter a domain above to start.</p>
             </div>
           )}
         </div>

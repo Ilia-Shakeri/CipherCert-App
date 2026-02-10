@@ -13,9 +13,9 @@ interface StatusCardProps {
 export function StatusCard({ title, value, percentage, icon: Icon, color, isDark }: StatusCardProps) {
   return (
     <div 
-      // Added outline-none and ring-0 to prevent square focus halo
-      className="rounded-2xl p-6 border relative overflow-hidden group transition-all duration-300 hover:scale-105 outline-none focus:ring-0 focus:outline-none"
-      tabIndex={-1} // Prevents focus if clicked, further ensuring no square halo
+      // Added 'flex flex-col justify-between' to distribute content evenly
+      className="aspect-square rounded-2xl p-6 border relative overflow-hidden group transition-all duration-300 hover:scale-105 outline-none focus:ring-0 focus:outline-none flex flex-col justify-between"
+      tabIndex={-1} 
       style={{
         background: isDark 
           ? "rgba(15, 23, 42, 0.5)" 
@@ -35,16 +35,17 @@ export function StatusCard({ title, value, percentage, icon: Icon, color, isDark
         }}
       />
 
-      <div className="flex items-start justify-between mb-6 relative z-10">
+      {/* Header: Title, Value, Icon */}
+      <div className="flex items-start justify-between relative z-10">
         <div>
           <p 
-            className="text-sm mb-2 uppercase tracking-wider"
-            style={{ color: isDark ? "#64748B" : "#94A3B8" }}
+            className="text-sm mb-1 uppercase tracking-wider font-semibold"
+            style={{ color: isDark ? "#94A3B8" : "#64748B" }}
           >
             {title}
           </p>
           <p 
-            className="text-4xl font-bold"
+            className="text-3xl font-bold"
             style={{ 
               color: isDark ? "#FFFFFF" : "#0F172A",
               fontFamily: "'JetBrains Mono', monospace"
@@ -54,21 +55,25 @@ export function StatusCard({ title, value, percentage, icon: Icon, color, isDark
           </p>
         </div>
         <div 
-          className="w-12 h-12 rounded-xl flex items-center justify-center relative"
+          className="w-10 h-10 rounded-xl flex items-center justify-center relative flex-shrink-0"
           style={{
             background: `${color}20`,
             boxShadow: `0 0 20px ${color}40`
           }}
         >
-          <Icon className="w-6 h-6" style={{ color }} />
+          <Icon className="w-5 h-5" style={{ color }} />
         </div>
       </div>
 
-      <div className="flex justify-center relative z-10">
+      {/* Center: Circular Progress */}
+      <div className="flex justify-center items-center relative z-10 flex-1">
         <CircularProgress 
           percentage={percentage} 
           color={color}
           isDark={isDark}
+          // Slightly adjusted size for square card
+          size={140}
+          strokeWidth={10}
         />
       </div>
     </div>
