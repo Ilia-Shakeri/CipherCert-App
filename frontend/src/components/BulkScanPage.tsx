@@ -16,30 +16,30 @@ export function BulkScanPage({ isDark }: BulkScanPageProps) {
   const [progress, setProgress] = useState({ current: 0, total: 0 });
   const [scanComplete, setScanComplete] = useState(false);
 
-  // --- File Processing ---
-  const processFile = (file: File) => {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const text = e.target?.result as string;
-      const lines = text
-        .split(/\r?\n/)
-        .map(line => line.trim())
-        .filter(line => line.length > 0);
+// --- File Processing (Keep all lines for feedback) ---
+const processFile = (file: File) => {
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const text = e.target?.result as string;
+    const lines = text
+      .split(/\r?\n/)
+      .map(line => line.trim())
+      .filter(line => line.length > 0); // Only remove truly empty lines
 
-      if (lines.length === 0) {
-        toast.error("File is empty or invalid!");
-        return;
-      }
+    if (lines.length === 0) {
+      toast.error("File is empty!");
+      return;
+    }
 
-      setFileContent(lines);
-      setUploadedFile(file);
-      setScanComplete(false);
-      setResults({ successful: [], failed: [] });
-      setProgress({ current: 0, total: lines.length });
-      toast.success(`Found ${lines.length} targets in file.`);
-    };
-    reader.readAsText(file);
+    setFileContent(lines);
+    setUploadedFile(file);
+    setScanComplete(false);
+    setResults({ successful: [], failed: [] });
+    setProgress({ current: 0, total: lines.length });
+    toast.success(`Found ${lines.length} targets in file.`);
   };
+  reader.readAsText(file);
+};
 
   // --- Drag & Drop Handlers ---
   const handleDrag = useCallback((e: React.DragEvent) => {
@@ -80,42 +80,53 @@ export function BulkScanPage({ isDark }: BulkScanPageProps) {
     setProgress({ current: 0, total: 0 });
   };
 
-  // --- Start Scan Logic ---
-  const handleStartBulkScan = async () => {
-    if (fileContent.length === 0) return;
+// --- Start Scan Logic (With validation bypass) ---
+const handleStartBulkScan = async () => {
+  if (fileContent.length === 0) return;
+  setIsScanning(true);
+  setScanComplete(false);
+  setResults({ successful: [], failed: [] });
+  setProgress(prev => ({ ...prev, current: 0 }));
 
-    setIsScanning(true);
-    setScanComplete(false);
-    setResults({ successful: [], failed: [] });
-    setProgress(prev => ({ ...prev, current: 0 }));
+  // Regex patterns for validation
+  const ipv4Regex = /^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/;
+  const ipv6Regex = /^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))$/;
+  const domainRegex = /^(?!.*@)[a-zA-Z0-9][a-zA-Z0-9-]{0,61}[a-zA-Z0-9](?:\.[a-zA-Z]{2,})+$/;
 
-    toast.info("Starting bulk scan engine...");
+  for (let i = 0; i < fileContent.length; i++) {
+    const target = fileContent[i];
+    setProgress(prev => ({ ...prev, current: i + 1 }));
 
-    for (let i = 0; i < fileContent.length; i++) {
-      const domain = fileContent[i];
-      setProgress(prev => ({ ...prev, current: i + 1 }));
+    // Check if target is valid
+    const isValid = ipv4Regex.test(target) || ipv6Regex.test(target) || domainRegex.test(target);
 
-      try {
-        const response = await fetch("http://127.0.0.1:8000/api/scan", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ domain: domain }),
-        });
-
-        if (response.ok) {
-          setResults(prev => ({ ...prev, successful: [...prev.successful, domain] }));
-        } else {
-          setResults(prev => ({ ...prev, failed: [...prev.failed, domain] }));
-        }
-      } catch (error) {
-        setResults(prev => ({ ...prev, failed: [...prev.failed, domain] }));
-      }
+    if (!isValid) {
+      // If it's nonsense, mark it as failed immediately without calling the backend
+      setResults(prev => ({ ...prev, failed: [...prev.failed, `${target} (Invalid Format)`] }));
+      continue; // Move to the next item
     }
 
-    setIsScanning(false);
-    setScanComplete(true);
-    toast.success(`Bulk scan finished!`);
-  };
+    try {
+      const response = await fetch("http://127.0.0.1:8000/api/scan", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ domain: target }),
+      });
+
+      if (response.ok) {
+        setResults(prev => ({ ...prev, successful: [...prev.successful, target] }));
+      } else {
+        setResults(prev => ({ ...prev, failed: [...prev.failed, target] }));
+      }
+    } catch (error) {
+      setResults(prev => ({ ...prev, failed: [...prev.failed, target] }));
+    }
+  }
+
+  setIsScanning(false);
+  setScanComplete(true);
+  toast.success(`Bulk scan finished!`);
+};
 
   const boxStyle = {
     background: isDark ? "rgba(15, 23, 42, 0.5)" : "rgba(255, 255, 255, 0.5)",
@@ -325,7 +336,8 @@ export function BulkScanPage({ isDark }: BulkScanPageProps) {
                 <div className="p-4 overflow-y-auto font-mono text-sm flex-1 flex flex-col items-center">
                    {results.failed.length > 0 ? (
                      results.failed.map((d, i) => (
-                       <div key={i} className={`py-2 w-full text-center truncate font-bold text-lg ${isDark ? "text-white" : "text-black"}`}>
+                       <div key={i} className="py-2 w-full text-center truncate font-bold text-lg"
+                          style={{ color: isDark ? "#FFFFFF" : "#000000" }}>
                          {d}
                        </div>
                      ))
