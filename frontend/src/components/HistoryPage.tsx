@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { RefreshCw, FileDown, FileSpreadsheet, Search, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 interface HistoryItem {
   id: string;
@@ -29,9 +31,8 @@ export function HistoryPage({ isDark }: HistoryPageProps) {
       if (response.ok) {
         const data = await response.json();
         setHistory(data);
-        // Only show toast if explicitly requested (e.g., manual refresh), not on initial load
         if (showToast) {
-            toast.success("History updated");
+          toast.success("History updated");
         }
       } else {
         toast.error("Failed to load history");
@@ -45,11 +46,11 @@ export function HistoryPage({ isDark }: HistoryPageProps) {
   };
 
   useEffect(() => {
-    fetchHistory(false); // Pass false so it doesn't pop up on page load
+    fetchHistory(false);
   }, []);
 
   const handleRefresh = () => {
-    fetchHistory(true); // Pass true to show "History Updated" on manual click
+    fetchHistory(true);
   };
 
   // --- Clear History ---
@@ -103,9 +104,65 @@ export function HistoryPage({ isDark }: HistoryPageProps) {
     toast.success("Exported to Excel (CSV)");
   };
 
-  // --- Export PDF (Print) ---
+  // --- Enhanced PDF Export ---
   const handleExportPDF = () => {
-    window.print();
+    if (history.length === 0) {
+      toast.error("No history to export");
+      return;
+    }
+
+    try {
+      const doc = new jsPDF();
+
+      // Header
+      doc.setFontSize(22);
+      doc.setTextColor(41, 128, 185);
+      doc.text("CipherCert History Report", 14, 20);
+
+      // Metadata
+      doc.setFontSize(10);
+      doc.setTextColor(100);
+      doc.text(`Generated on: ${new Date().toLocaleString()}`, 14, 28);
+      doc.setLineWidth(0.5);
+      doc.line(14, 32, 196, 32);
+
+      // Stats
+      doc.setFontSize(11);
+      doc.setTextColor(0);
+      doc.text(`Total Records: ${history.length}`, 14, 40);
+
+      // Table
+      autoTable(doc, {
+        startY: 45,
+        head: [['Timestamp', 'Domain', 'Status', 'Grade', 'Issuer', 'Expiry']],
+        body: history.map(item => [
+          item.timestamp,
+          item.domain,
+          item.status.toUpperCase(),
+          item.grade,
+          item.issuer,
+          item.expiryDate
+        ]),
+        theme: 'grid',
+        headStyles: { fillColor: [41, 128, 185] },
+        styles: { fontSize: 8 },
+        alternateRowStyles: { fillColor: [245, 247, 250] },
+        didParseCell: function(data) {
+          if (data.section === 'body' && data.column.index === 2) {
+             const status = data.cell.raw as string;
+             if (status === 'SECURE') data.cell.styles.textColor = [39, 174, 96];
+             if (status === 'WARNING') data.cell.styles.textColor = [243, 156, 18];
+             if (status === 'EXPIRED') data.cell.styles.textColor = [192, 57, 43];
+          }
+        }
+      });
+
+      doc.save(`CipherCert_History_${new Date().toISOString().split('T')[0]}.pdf`);
+      toast.success("PDF Report downloaded");
+    } catch (err) {
+      console.error("PDF Export Error:", err);
+      toast.error("Failed to generate PDF. Check console.");
+    }
   };
 
   const filteredHistory = history.filter(item =>
@@ -128,22 +185,6 @@ export function HistoryPage({ isDark }: HistoryPageProps) {
 
   return (
     <div className="p-8 space-y-8">
-      {/* Styles for Printing */}
-      <style>
-        {`
-          @media print {
-            .no-print, aside, button, input { display: none !important; }
-            .printable-table { width: 100% !important; overflow: visible !important; }
-            body, div, table, th, td { 
-              background-color: white !important; 
-              color: black !important; 
-              border-color: #ddd !important;
-            }
-            .fixed.inset-0 { display: none !important; }
-          }
-        `}
-      </style>
-
       {/* Header */}
       <div className="flex items-start justify-between no-print">
         <div>
