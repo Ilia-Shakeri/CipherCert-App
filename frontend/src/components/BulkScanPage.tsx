@@ -237,7 +237,9 @@ export function BulkScanPage({ isDark }: BulkScanPageProps) {
           {/* Big Green Check - No Box, Force Green Color */}
           <div className="flex justify-center mb-6">
              <CheckCircle2 
-                className="w-80 h-80 !text-green-500" 
+                size={80} // <--- FORCE SIZE HERE (160px)
+                strokeWidth={1.5} // Makes the lines look cleaner at this size
+                className="text-green-500" 
                 style={{ 
                     color: "#22c55e",
                     filter: "drop-shadow(0 0 25px rgba(34, 197, 94, 0.8))"
@@ -246,10 +248,11 @@ export function BulkScanPage({ isDark }: BulkScanPageProps) {
           </div>
 
           <div>
-            <h2 className="text-4xl font-bold mb-3" style={{ color: isDark ? "#FFFFFF" : "#0F172A", fontFamily: "'JetBrains Mono', monospace" }}>
+            {/* Changed from text-4xl to text-2xl for a "reasonable" size */}
+            <h2 className="text-2xl font-bold mb-3" style={{ color: isDark ? "#FFFFFF" : "#0F172A", fontFamily: "'JetBrains Mono', monospace" }}>
               Scan Completed!
             </h2>
-            <p className="text-lg" style={{ color: isDark ? "#94A3B8" : "#64748B" }}>
+            <p className="text-base" style={{ color: isDark ? "#94A3B8" : "#64748B" }}>
               Processed all {progress.total} targets.
             </p>
           </div>
