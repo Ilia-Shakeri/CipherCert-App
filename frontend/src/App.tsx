@@ -5,7 +5,7 @@ import { BulkScanPage } from "./components/BulkScanPage";
 import { HistoryPage } from "./components/HistoryPage";
 import { AutomationPage } from "./components/AutomationPage";
 import { SettingsPage } from "./components/SettingsPage";
-import { Toaster } from "sonner@2.0.3";
+import { Toaster } from "sonner";
 
 export default function App() {
   const [isDark, setIsDark] = useState(true);
@@ -31,7 +31,8 @@ export default function App() {
   return (
     <div className={isDark ? "dark" : ""}>
       <div 
-        className="flex min-h-screen relative overflow-hidden"
+        // CHANGE: Changed 'min-h-screen' to 'h-screen' to fix the layout height to the viewport
+        className="flex h-screen relative overflow-hidden"
         style={{ 
           backgroundColor: isDark ? "#0F172A" : "#F8FAFC",
           fontFamily: "'Inter', 'JetBrains Mono', -apple-system, system-ui, sans-serif"
@@ -55,6 +56,7 @@ export default function App() {
         />
 
         {/* Sidebar */}
+        {/* Sidebar is a flex item, it will take its defined width and full height */}
         <GlassSidebar 
           activeTab={activeTab}
           onTabChange={setActiveTab}
@@ -63,13 +65,14 @@ export default function App() {
         />
 
         {/* Main Content */}
+        {/* flex-1 makes it take remaining width. overflow-auto enables scrolling within this div only */}
         <div className="flex-1 overflow-auto relative z-10">
           {renderPage()}
         </div>
 
         {/* Toast Notifications */}
         <Toaster 
-          position="top-center"
+          position="bottom-left"
           theme={isDark ? "dark" : "light"}
           richColors
         />
