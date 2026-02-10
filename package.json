@@ -1,0 +1,11 @@
+{
+  "name": "ciphercert-root",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "electron": "npm run electron --prefix frontend",
+    "dev": "npm run dev --prefix frontend",
+    "build": "npm run build --prefix frontend",
+    "install-frontend": "npm install --prefix frontend"
+  }
+}

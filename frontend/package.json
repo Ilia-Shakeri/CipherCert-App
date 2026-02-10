@@ -2,7 +2,7 @@
   "name": "enterprise-ssl-dashboard",
   "version": "0.1.0",
   "private": true,
-  "main": "electron-main.js",
+  "main": "../electron/main.js",
   "dependencies": {
     "@radix-ui/react-accordion": "^1.2.3",
     "@radix-ui/react-alert-dialog": "^1.1.6",
@@ -63,6 +63,6 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "electron": "concurrently \"npm run dev\" \"wait-on tcp:5173 && electron .\""
+    "electron": "concurrently \"npm run dev\" \"wait-on tcp:5173 && electron ../electron/main.js\""
   }
 }
