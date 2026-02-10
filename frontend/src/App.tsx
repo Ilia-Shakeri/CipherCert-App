@@ -6,13 +6,13 @@ import { HistoryPage } from "./components/HistoryPage";
 import { AutomationPage } from "./components/AutomationPage";
 import { SettingsPage } from "./components/SettingsPage";
 import { Toaster } from "sonner";
+import AppHeader from './components/AppHeader';
 
 export default function App() {
   const [isDark, setIsDark] = useState(true);
   const [activeTab, setActiveTab] = useState("dashboard");
 
-  // --- THEME SYNC FIX ---
-  // Sends a message to Electron (electron/main.js) to force the window color
+  // همگام‌سازی تم با الکترون
   useEffect(() => {
     // @ts-ignore
     if (window.require) {
@@ -21,7 +21,7 @@ export default function App() {
         const { ipcRenderer } = window.require('electron');
         ipcRenderer.send('theme-changed', isDark ? 'dark' : 'light');
       } catch (error) {
-        console.log("Browser mode (no electron IPC)");
+        console.log("Browser mode");
       }
     }
   }, [isDark]);
@@ -37,31 +37,22 @@ export default function App() {
     }
   };
 
+  const handleRefresh = () => {
+    window.location.reload();
+  };
+
   return (
     <div className={isDark ? "dark" : ""}>
       <div 
-        className="flex h-screen relative overflow-hidden"
+        className="relative min-h-screen overflow-hidden"
         style={{ 
           backgroundColor: isDark ? "#0F172A" : "#F8FAFC",
           fontFamily: "'Inter', 'JetBrains Mono', -apple-system, system-ui, sans-serif"
         }}
       >
-        {/* --- WINDOW DRAG REGION --- */}
-        {/* Invisible bar at top to allow dragging the window */}
-        <div style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          width: '100%',
-          height: '35px', 
-          WebkitAppRegion: 'drag', // Electron specific CSS to allow dragging
-          zIndex: 50,
-          pointerEvents: 'none' 
-        }} />
-
-        {/* Background Mesh Gradient */}
+        {/* --- پس‌زمینه --- */}
         <div 
-          className="fixed inset-0 pointer-events-none"
+          className="fixed inset-0 pointer-events-none z-0"
           style={{
             background: isDark
               ? `radial-gradient(circle at 20% 30%, rgba(34, 211, 238, 0.08) 0%, transparent 50%),
@@ -71,21 +62,42 @@ export default function App() {
           }}
         />
 
-        {/* Sidebar */}
-        <GlassSidebar 
-          activeTab={activeTab}
-          onTabChange={setActiveTab}
-          isDark={isDark}
-          onThemeToggle={() => setIsDark(!isDark)}
-        />
+        {/* --- لایه محافظ درگ (Safety Drag Layer) --- */}
+        {/* اگر هدر کار نکرد، این نوار نامرئی بالای صفحه همیشه پنجره را جابجا می‌کند */}
+        <div style={{
+          position: 'fixed',
+          top: 0, left: 0, right: 0,
+          height: '40px',
+          zIndex: 9999, // بالاترین اولویت
+          WebkitAppRegion: 'drag',
+          pointerEvents: 'none' // اجازه می‌دهد کلیک‌ها رد شوند و به دکمه‌ها برسند
+        }} />
 
-        {/* Main Content */}
-        {/* Added pt-6 to push content down below the drag bar */}
-        <div className="flex-1 overflow-auto relative z-10 pt-6">
-          {renderPage()}
+        {/* --- هدر برنامه --- */}
+        <div className="fixed top-0 left-0 right-0 z-50">
+           <AppHeader onRefresh={handleRefresh} />
         </div>
 
-        {/* Toast Notifications */}
+        {/* --- بدنه اصلی برنامه --- */}
+        {/* پدینگ بالا (pt-12) باعث می‌شود محتوا زیر هدر نرود */}
+        <div className="flex h-screen pt-10 relative z-10">
+          
+          {/* سایدبار */}
+          <div className="h-full">
+             <GlassSidebar 
+              activeTab={activeTab}
+              onTabChange={setActiveTab}
+              isDark={isDark}
+              onThemeToggle={() => setIsDark(!isDark)}
+            />
+          </div>
+
+          {/* محتوای صفحات */}
+          <div className="flex-1 overflow-auto p-6">
+            {renderPage()}
+          </div>
+        </div>
+
         <Toaster 
           position="bottom-left"
           theme={isDark ? "dark" : "light"}
