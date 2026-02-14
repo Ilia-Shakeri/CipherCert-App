@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain } = require('electron');
+const { app, BrowserWindow, ipcMain, screen } = require('electron');
 const path = require('path');
 const { spawn } = require('child_process');
 const fs = require('fs');
@@ -8,33 +8,48 @@ let mainWindow;
 let pythonProcess;
 
 function createWindow() {
+  // Get primary display dimensions
+  const primaryDisplay = screen.getPrimaryDisplay();
+  const { width: screenWidth, height: screenHeight } = primaryDisplay.workAreaSize;
+
+  // --- DYNAMIC INITIAL SIZE ---
+  // Open at 75% of the screen size (Logical starting size)
+  const initialWidth = Math.round(screenWidth * 0.75);
+  const initialHeight = Math.round(screenHeight * 0.75);
+
   mainWindow = new BrowserWindow({
-    width: 1280,
-    height: 800,
+    width: initialWidth,
+    height: initialHeight,
+
+    // --- STATIC MINIMUM SIZE ---
+    // Fixed pixels. This allows the user to shrink the window significantly,
+    // but stops before the UI layout breaks (adjust these numbers based on your React design).
+    minWidth: 900,  
+    minHeight: 600, 
+    
+    center: true, // Always open in center
+
     title: "CipherCert",
-    icon: path.join(__dirname, 'public/logo.ico'), // Adjusted path for typical structure
+    icon: path.join(__dirname, 'public/logo.ico'), 
     
     // --- FORCE TITLE BAR COLOR ---
-    // 'hidden' removes the native Windows frame but keeps the traffic light buttons
     titleBarStyle: 'hidden',
-    // We set the overlay controls to match the initial Dark Mode
     titleBarOverlay: {
-      color: '#0F172A',      // Dark background
-      symbolColor: '#FFFFFF', // White icons
-      height: 35             // Height of the top bar
+      color: '#0F172A',      
+      symbolColor: '#FFFFFF', 
+      height: 35             
     },
 
     webPreferences: {
-      nodeIntegration: true,    // Allows using Node.js in React
-      contextIsolation: false,  // Required for window.require to work easily
-      webSecurity: false        // (Optional) Helps with local dev CORS sometimes
+      nodeIntegration: true,    
+      contextIsolation: false,  
+      webSecurity: false        
     },
   });
 
   // Load the app
   const startUrl = process.env.ELECTRON_START_URL || 'http://localhost:5173';
   mainWindow.loadURL(startUrl).catch(e => {
-    // If dev server isn't running, fall back to build file
     mainWindow.loadFile(path.join(__dirname, 'dist/index.html'));
   });
 
@@ -45,18 +60,13 @@ function createWindow() {
 
 // --- PYTHON BACKEND LAUNCHER ---
 function startPythonBackend() {
-  // 1. Resolve absolute paths to avoid "file not found" errors
-  // Assuming structure: root/frontend/electron-main.js -> root/backend
   const backendDir = path.resolve(__dirname, '../backend');
   const scriptPath = path.join(backendDir, 'api.py');
   
-  // 2. Determine Python Executable Path
   let pythonExecutable;
   if (process.platform === 'win32') {
-    // Windows: root/venv/Scripts/python.exe
     pythonExecutable = path.resolve(__dirname, '../venv/Scripts/python.exe');
   } else {
-    // Linux/Mac: root/venv/bin/python
     pythonExecutable = path.resolve(__dirname, '../venv/bin/python');
   }
 
@@ -65,18 +75,14 @@ function startPythonBackend() {
   console.log("Python Script:", scriptPath);
   console.log("Python Exe:", pythonExecutable);
 
-  // 3. Check if files exist before spawning
   if (!fs.existsSync(pythonExecutable)) {
     console.error("CRITICAL: Python executable not found at", pythonExecutable);
-    console.error("Please check if 'venv' exists in the project root.");
     return;
   }
 
-  // 4. Spawn the process
-  // cwd: backendDir is CRITICAL so python can find 'engine.py'
   pythonProcess = spawn(pythonExecutable, ['-u', scriptPath], { 
     cwd: backendDir,
-    stdio: ['ignore', 'pipe', 'pipe'] // Capture output
+    stdio: ['ignore', 'pipe', 'pipe'] 
   });
 
   pythonProcess.stdout.on('data', (data) => {
@@ -92,18 +98,16 @@ function startPythonBackend() {
   });
 }
 
-// --- THEME HANDLER (The Fix for Black Bar) ---
+// --- THEME HANDLER ---
 ipcMain.on('theme-changed', (event, mode) => {
   if (!mainWindow) return;
 
   if (mode === 'light') {
-    // Force White Background, Black Icons
     mainWindow.setTitleBarOverlay({
       color: '#ffffff',
       symbolColor: '#000000'
     });
   } else {
-    // Force Dark Background, White Icons
     mainWindow.setTitleBarOverlay({
       color: '#0F172A',
       symbolColor: '#FFFFFF'
@@ -124,7 +128,6 @@ app.on('window-all-closed', () => {
 });
 
 app.on('will-quit', () => {
-  // Kill Python process when Electron quits
   if (pythonProcess) {
     pythonProcess.kill();
   }
