@@ -10,6 +10,12 @@ import ethLogo from '../assets/ethereum.png';
 import usdtLogo from '../assets/tether.png';
 import xmrLogo from '../assets/monero.png';
 
+// Wallet QR codes (images)
+import btcQr from '../assets/btc-qr.png';
+import ethQr from '../assets/eth-qr.png';
+import usdtQr from '../assets/usdt-qr.png';
+import xmrQr from '../assets/xmr-qr.png';
+
 /**
  * DonatePage Component
  *
@@ -35,6 +41,7 @@ interface CryptoCard {
   logo: string;
   logoType?: 'text' | 'svg' | 'image';
   logoUrl?: string;
+  qrUrl?: string;
 }
 
 export function DonatePage({ isDark }: DonatePageProps) {
@@ -53,6 +60,7 @@ export function DonatePage({ isDark }: DonatePageProps) {
         'linear-gradient(135deg, rgba(247, 147, 26, 0.3), rgba(247, 147, 26, 0.1))',
       logo: '₿',
       logoUrl: btcLogo,
+      qrUrl: btcQr,
     },
     {
       id: 'eth',
@@ -65,6 +73,7 @@ export function DonatePage({ isDark }: DonatePageProps) {
         'linear-gradient(135deg, rgba(98, 126, 234, 0.3), rgba(98, 126, 234, 0.1))',
       logo: 'Ξ',
       logoUrl: ethLogo,
+      qrUrl: ethQr,
     },
     {
       id: 'usdt',
@@ -77,6 +86,7 @@ export function DonatePage({ isDark }: DonatePageProps) {
         'linear-gradient(135deg, rgba(38, 161, 123, 0.3), rgba(38, 161, 123, 0.1))',
       logo: '₮',
       logoUrl: usdtLogo,
+      qrUrl: usdtQr,
     },
     {
       id: 'xmr',
@@ -90,6 +100,7 @@ export function DonatePage({ isDark }: DonatePageProps) {
         'linear-gradient(135deg, rgba(255, 102, 0, 0.3), rgba(255, 102, 0, 0.1))',
       logo: 'ɱ',
       logoUrl: xmrLogo,
+      qrUrl: xmrQr,
     },
   ];
 
@@ -343,14 +354,6 @@ export function DonatePage({ isDark }: DonatePageProps) {
                       {crypto.network}
                     </div>
 
-                    {/* Address Label */}
-                    <p
-                      className="text-xs mb-3 uppercase tracking-wider"
-                      style={{ color: isDark ? '#64748B' : '#94A3B8' }}
-                    >
-                      Wallet Address
-                    </p>
-
                     {/* Address Box */}
                     <div
                       className="w-full rounded-xl p-4 mb-4"
@@ -372,9 +375,9 @@ export function DonatePage({ isDark }: DonatePageProps) {
                       </p>
                     </div>
 
-                    {/* QR Code Placeholder */}
+                    {/* Wallet QR Code */}
                     <div
-                      className="w-24 h-24 rounded-lg mb-4 flex items-center justify-center"
+                      className="w-24 h-24 rounded-lg mb-4 flex items-center justify-center overflow-hidden"
                       style={{
                         backgroundColor: isDark
                           ? 'rgba(255, 255, 255, 0.9)'
@@ -382,15 +385,25 @@ export function DonatePage({ isDark }: DonatePageProps) {
                         border: `2px solid ${crypto.color}60`,
                       }}
                     >
-                      <div
-                        className="w-20 h-20 rounded"
-                        style={{
-                          background: `
-                            repeating-linear-gradient(0deg, ${crypto.color}20 0px, ${crypto.color}20 2px, transparent 2px, transparent 4px),
-                            repeating-linear-gradient(90deg, ${crypto.color}20 0px, ${crypto.color}20 2px, transparent 2px, transparent 4px)
-                          `,
-                        }}
-                      />
+                      {crypto.qrUrl ? (
+                        <img
+                          src={crypto.qrUrl}
+                          alt={`${crypto.name} wallet QR code`}
+                          className="w-20 h-20 object-contain"
+                          draggable={false}
+                        />
+                      ) : (
+                        // Fallback keeps the layout intact if an image is missing
+                        <div
+                          className="w-20 h-20 rounded"
+                          style={{
+                            background: `
+          repeating-linear-gradient(0deg, ${crypto.color}20 0px, ${crypto.color}20 2px, transparent 2px, transparent 4px),
+          repeating-linear-gradient(90deg, ${crypto.color}20 0px, ${crypto.color}20 2px, transparent 2px, transparent 4px)
+        `,
+                          }}
+                        />
+                      )}
                     </div>
 
                     {/* Copy Button */}
