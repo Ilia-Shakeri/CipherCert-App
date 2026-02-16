@@ -1,14 +1,14 @@
-import { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Heart, Copy, Check } from 'lucide-react';
 import { motion } from 'motion/react';
 import { toast } from 'sonner@2.0.3';
 
 // Import your crypto logos from the assets directory
 // Adjust the path based on where your assets folder is located
-import btcLogo from '../assets/logo.png';
-import ethLogo from '../assets/logo.png';
-import usdtLogo from '../assets/logo.png';
-import xmrLogo from '../assets/logo.png';
+import btcLogo from '../assets/bitcoin.png';
+import ethLogo from '../assets/ethereum.png';
+import usdtLogo from '../assets/tether.png';
+import xmrLogo from '../assets/monero.png';
 
 /**
  * DonatePage Component
@@ -41,66 +41,66 @@ export function DonatePage({ isDark }: DonatePageProps) {
   const [flippedCards, setFlippedCards] = useState<Set<string>>(new Set());
   const [copiedCard, setCopiedCard] = useState<string | null>(null);
 
-  const cryptoCards: CryptoCard[] = [
-    {
-      id: 'btc',
-      name: 'Bitcoin',
-      symbol: 'BTC',
-      address: 'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh',
-      network: 'Bitcoin Network',
-      color: '#F7931A',
-      gradient:
-        'linear-gradient(135deg, rgba(247, 147, 26, 0.3), rgba(247, 147, 26, 0.1))',
-      logo: '₿',
-      logoUrl: btcLogo,
-    },
-    {
-      id: 'eth',
-      name: 'Ethereum',
-      symbol: 'ETH',
-      address: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb',
-      network: 'ERC-20',
-      color: '#627EEA',
-      gradient:
-        'linear-gradient(135deg, rgba(98, 126, 234, 0.3), rgba(98, 126, 234, 0.1))',
-      logo: 'Ξ',
-      logoUrl: ethLogo,
-    },
-    {
-      id: 'usdt',
-      name: 'Tether',
-      symbol: 'USDT',
-      address: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb',
-      network: 'ERC-20',
-      color: '#26A17B',
-      gradient:
-        'linear-gradient(135deg, rgba(38, 161, 123, 0.3), rgba(38, 161, 123, 0.1))',
-      logo: '₮',
-      logoUrl: usdtLogo,
-    },
-    {
-      id: 'xmr',
-      name: 'Monero',
-      symbol: 'XMR',
-      address: '4AdUndXHHZ6cfufTMvppY6JwXNouMBzSkbLYfpAV5Usx',
-      network: 'Monero Network',
-      color: '#FF6600',
-      gradient:
-        'linear-gradient(135deg, rgba(255, 102, 0, 0.3), rgba(255, 102, 0, 0.1))',
-      logo: 'ɱ',
-      logoUrl: xmrLogo,
-    },
-  ];
+  const cryptoCards: CryptoCard[] = useMemo(
+    () => [
+      {
+        id: 'btc',
+        name: 'Bitcoin',
+        symbol: 'BTC',
+        address: 'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh',
+        network: 'Bitcoin Network',
+        color: '#F7931A',
+        gradient:
+          'linear-gradient(135deg, rgba(247, 147, 26, 0.32), rgba(247, 147, 26, 0.12))',
+        logo: '₿',
+        logoUrl: btcLogo,
+      },
+      {
+        id: 'eth',
+        name: 'Ethereum',
+        symbol: 'ETH',
+        address: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb',
+        network: 'ERC-20',
+        color: '#627EEA',
+        gradient:
+          'linear-gradient(135deg, rgba(98, 126, 234, 0.32), rgba(98, 126, 234, 0.12))',
+        logo: 'Ξ',
+        logoUrl: ethLogo,
+      },
+      {
+        id: 'usdt',
+        name: 'Tether',
+        symbol: 'USDT',
+        address: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb',
+        network: 'ERC-20',
+        color: '#26A17B',
+        gradient:
+          'linear-gradient(135deg, rgba(38, 161, 123, 0.32), rgba(38, 161, 123, 0.12))',
+        logo: '₮',
+        logoUrl: usdtLogo,
+      },
+      {
+        id: 'xmr',
+        name: 'Monero',
+        symbol: 'XMR',
+        address: '4AdUndXHHZ6cfufTMvppY6JwXNouMBzSkbLYfpAV5Usx',
+        network: 'Monero Network',
+        color: '#FF6600',
+        gradient:
+          'linear-gradient(135deg, rgba(255, 102, 0, 0.32), rgba(255, 102, 0, 0.12))',
+        logo: 'ɱ',
+        logoUrl: xmrLogo,
+      },
+    ],
+    []
+  );
 
   const handleCardClick = (cardId: string) => {
     setFlippedCards((prev) => {
-      const newSet = new Set(prev);
-      if (newSet.has(cardId)) {
-        newSet.delete(cardId);
-      } else {
-        newSet.add(cardId);
-      }
-      return newSet;
+      const next = new Set(prev);
+      if (next.has(cardId)) next.delete(cardId);
+      else next.add(cardId);
+      return next;
     });
   };
 
@@ -114,328 +114,326 @@ export function DonatePage({ isDark }: DonatePageProps) {
       await navigator.clipboard.writeText(address);
       setCopiedCard(cardId);
       toast.success('Address copied to clipboard!');
-      setTimeout(() => setCopiedCard(null), 2000);
-    } catch (err) {
+      window.setTimeout(() => setCopiedCard(null), 2000);
+    } catch {
       toast.error('Failed to copy address');
     }
   };
 
+  // Layout numbers are tuned to match the provided screenshot.
+  const CARD_H = 460; // px
+  const CARD_W = 280; // px
+
   return (
-    <div className="min-h-screen p-8 flex items-center justify-center">
-      <div className="max-w-6xl w-full">
-        {/* Header Section */}
-        <div className="text-center mb-16 relative">
-          {/* Glowing Heart Icon */}
+    <div className="min-h-screen px-10 pt-16 pb-10 flex justify-center">
+      <div className="w-full max-w-7xl">
+        {/* Page Header */}
+        <div className="mb-12 text-center">
           <motion.div
-            className="inline-block mb-6"
-            animate={{
-              scale: [1, 1.1, 1],
-            }}
-            transition={{
-              duration: 2,
-              repeat: Infinity,
-              ease: 'easeInOut',
-            }}
+            initial={{ opacity: 0, y: 18 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.55 }}
           >
-            <div
-              className="relative inline-flex items-center justify-center"
-              style={{
-                filter: 'drop-shadow(0 0 30px rgba(239, 68, 68, 0.6))',
-              }}
-            >
-              <Heart
-                className="w-24 h-24"
+            <div className="flex items-center justify-center gap-3 mb-4">
+              <div
+                className="rounded-full flex items-center justify-center"
                 style={{
-                  color: '#EF4444',
-                  fill: '#EF4444',
-                }}
-              />
-              {/* Pulse rings */}
-              <motion.div
-                className="absolute inset-0"
-                animate={{
-                  scale: [1, 1.5, 1],
-                  opacity: [0.5, 0, 0.5],
-                }}
-                transition={{
-                  duration: 2,
-                  repeat: Infinity,
-                  ease: 'easeOut',
+                  width: 64,
+                  height: 64,
+                  background: 'rgba(239, 68, 68, 0.12)',
+                  border: '1px solid rgba(239, 68, 68, 0.28)',
+                  boxShadow: '0 0 40px rgba(239, 68, 68, 0.18)',
                 }}
               >
-                <div
-                  className="w-24 h-24 rounded-full border-2"
-                  style={{ borderColor: '#EF4444' }}
+                <Heart
+                  className="w-8 h-8"
+                  style={{ color: '#EF4444', fill: '#EF4444' }}
                 />
-              </motion.div>
+              </div>
+              <h1
+                className="text-4xl font-bold"
+                style={{
+                  color: isDark ? '#FFFFFF' : '#0F172A',
+                  fontFamily: "'Inter', sans-serif",
+                  letterSpacing: '-0.02em',
+                }}
+              >
+                Support CipherCert
+              </h1>
             </div>
+            <p
+              className="text-lg max-w-2xl mx-auto"
+              style={{
+                color: isDark ? '#94A3B8' : '#64748B',
+                fontFamily: "'Inter', sans-serif",
+              }}
+            >
+              Help us maintain and improve CipherCert. Your donations support
+              development, server costs, and new features.
+            </p>
           </motion.div>
-
-          <h1
-            className="mb-4"
-            style={{
-              color: isDark ? '#FFFFFF' : '#0F172A',
-              fontSize: '48px',
-              fontWeight: 'bold',
-              fontFamily: "'JetBrains Mono', monospace",
-              letterSpacing: '-0.02em',
-            }}
-          >
-            Support Development
-          </h1>
-          <p
-            className="text-xl"
-            style={{
-              color: isDark ? '#94A3B8' : '#64748B',
-              fontFamily: "'Inter', sans-serif",
-            }}
-          >
-            Your contribution keeps the servers running and development active
-          </p>
-
-          {/* Decorative glow */}
-          <div
-            className="absolute top-0 left-1/2 transform -translate-x-1/2 w-96 h-96 pointer-events-none"
-            style={{
-              background:
-                'radial-gradient(circle, rgba(239, 68, 68, 0.15), transparent 70%)',
-              filter: 'blur(40px)',
-            }}
-          />
         </div>
 
         {/* Crypto Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 perspective-1000">
-          {cryptoCards.map((crypto) => (
-            <motion.div
-              key={crypto.id}
-              className="relative h-[420px] cursor-pointer"
-              onClick={() => handleCardClick(crypto.id)}
-              whileHover={{ scale: 1.05 }}
-              transition={{ duration: 0.3 }}
-              style={{ perspective: '1000px' }}
-            >
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 place-items-center">
+          {cryptoCards.map((crypto, index) => {
+            const isFlipped = flippedCards.has(crypto.id);
+            const isCopied = copiedCard === crypto.id;
+
+            return (
               <motion.div
-                className="relative w-full h-full"
-                animate={{ rotateY: flippedCards.has(crypto.id) ? 180 : 0 }}
-                transition={{ duration: 0.6, type: 'spring', stiffness: 100 }}
-                style={{
-                  transformStyle: 'preserve-3d',
-                }}
+                key={crypto.id}
+                initial={{ opacity: 0, y: 26 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.55, delay: index * 0.08 }}
+                className="relative"
+                style={{ width: CARD_W }}
               >
-                {/* Front Side */}
-                <div
-                  className="absolute inset-0 rounded-2xl border overflow-hidden"
-                  style={{
-                    background: isDark
-                      ? 'rgba(15, 23, 42, 0.6)'
-                      : 'rgba(255, 255, 255, 0.6)',
-                    backdropFilter: 'blur(20px)',
-                    borderColor: 'rgba(255, 255, 255, 0.1)',
-                    boxShadow: `0 8px 32px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.1) inset`,
-                    backfaceVisibility: 'hidden',
-                    WebkitBackfaceVisibility: 'hidden',
-                  }}
+                <motion.div
+                  className="relative cursor-pointer"
+                  style={{ perspective: '1000px' }}
+                  onClick={() => handleCardClick(crypto.id)}
+                  whileHover={{ scale: 1.015 }}
+                  transition={{ duration: 0.2 }}
                 >
-                  {/* Gradient Background */}
-                  <div
-                    className="absolute inset-0"
-                    style={{ background: crypto.gradient }}
-                  />
-
-                  {/* Content */}
-                  <div className="relative h-full flex flex-col items-center justify-center p-6">
-                    {/* Crypto Logo */}
-                    {crypto.logoUrl ? (
-                      <div className="mb-6">
-                        <img
-                          src={crypto.logoUrl}
-                          alt={`${crypto.name} logo`}
-                          className="w-20 h-20 object-contain"
-                          style={{
-                            filter: `drop-shadow(0 0 20px ${crypto.color}60)`,
-                          }}
-                        />
-                      </div>
-                    ) : (
-                      <div
-                        className="mb-6"
-                        style={{
-                          fontSize: '80px',
-                          color: crypto.color,
-                          textShadow: `0 0 40px ${crypto.color}80`,
-                          fontWeight: 'bold',
-                        }}
-                      >
-                        {crypto.logo}
-                      </div>
-                    )}
-
-                    {/* Crypto Name */}
-                    <h3
-                      className="font-bold mb-2"
-                      style={{
-                        color: isDark ? '#FFFFFF' : '#0F172A',
-                        fontSize: '24px',
-                        fontFamily: "'JetBrains Mono', monospace",
-                      }}
-                    >
-                      {crypto.name}
-                    </h3>
-
-                    {/* Symbol */}
-                    <span
-                      className="px-4 py-1 rounded-full text-sm font-semibold"
-                      style={{
-                        backgroundColor: `${crypto.color}20`,
-                        color: crypto.color,
-                        border: `1px solid ${crypto.color}40`,
-                      }}
-                    >
-                      {crypto.symbol}
-                    </span>
-
-                    {/* Hint */}
-                    <p
-                      className="mt-6 text-sm"
-                      style={{ color: isDark ? '#64748B' : '#94A3B8' }}
-                    >
-                      Click to view address
-                    </p>
-                  </div>
-                </div>
-
-                {/* Back Side */}
-                <div
-                  className="absolute inset-0 rounded-2xl border overflow-hidden"
-                  style={{
-                    background: isDark
-                      ? 'rgba(15, 23, 42, 0.8)'
-                      : 'rgba(255, 255, 255, 0.8)',
-                    backdropFilter: 'blur(20px)',
-                    borderColor: 'rgba(255, 255, 255, 0.1)',
-                    boxShadow: `0 8px 32px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.1) inset`,
-                    backfaceVisibility: 'hidden',
-                    WebkitBackfaceVisibility: 'hidden',
-                    transform: 'rotateY(180deg)',
-                  }}
-                >
-                  {/* Darker gradient for back */}
-                  <div
-                    className="absolute inset-0 opacity-30"
-                    style={{ background: crypto.gradient }}
-                  />
-
-                  {/* Content */}
-                  <div className="relative h-full flex flex-col items-center justify-center p-6">
-                    {/* Network Badge */}
+                  <motion.div
+                    className="relative w-full"
+                    style={{
+                      height: `${CARD_H}px`, // Fixed card height (Tailwind utility may be missing)
+                      transformStyle: 'preserve-3d',
+                      transition: 'transform 0.6s',
+                    }}
+                    animate={{ rotateY: isFlipped ? 180 : 0 }}
+                  >
+                    {/* Front Side */}
                     <div
-                      className="px-3 py-1 rounded-full text-xs font-semibold mb-6"
+                      className="absolute inset-0 rounded-2xl p-6 border flex flex-col"
                       style={{
-                        backgroundColor: 'rgba(34, 211, 238, 0.2)',
-                        color: '#22D3EE',
-                        border: '1px solid rgba(34, 211, 238, 0.3)',
+                        background: isDark
+                          ? 'rgba(15, 23, 42, 0.68)'
+                          : 'rgba(255, 255, 255, 0.75)',
+                        backdropFilter: 'blur(22px)',
+                        borderColor: isDark
+                          ? 'rgba(255, 255, 255, 0.08)'
+                          : 'rgba(2, 132, 199, 0.18)',
+                        backgroundImage: crypto.gradient,
+                        backfaceVisibility: 'hidden',
+                        boxShadow: isDark
+                          ? '0 24px 60px rgba(0,0,0,0.32)'
+                          : '0 24px 60px rgba(15,23,42,0.14)',
                       }}
                     >
-                      {crypto.network}
+                      {/* Top chip / network */}
+                      <div className="flex items-center justify-between mb-6">
+                        <div
+                          className="px-3 py-1 rounded-full text-xs font-medium"
+                          style={{
+                            color: crypto.color,
+                            backgroundColor: `${crypto.color}18`,
+                            border: `1px solid ${crypto.color}30`,
+                          }}
+                        >
+                          {crypto.network}
+                        </div>
+
+                        <p
+                          className="text-xs"
+                          style={{ color: isDark ? '#64748B' : '#94A3B8' }}
+                        >
+                          Click to flip
+                        </p>
+                      </div>
+
+                      {/* Logo */}
+                      <div className="flex items-center justify-center mb-6">
+                        <div
+                          className="rounded-2xl flex items-center justify-center"
+                          style={{
+                            width: 84,
+                            height: 84,
+                            backgroundColor: `${crypto.color}14`,
+                            border: `1px solid ${crypto.color}2E`,
+                            boxShadow: `0 18px 40px ${crypto.color}22`,
+                          }}
+                        >
+                          {crypto.logoUrl ? (
+                            <img
+                              src={crypto.logoUrl}
+                              alt={`${crypto.name} logo`}
+                              className="object-contain"
+                              style={{ width: 44, height: 44 }}
+                            />
+                          ) : (
+                            <span
+                              className="text-3xl font-bold"
+                              style={{ color: crypto.color }}
+                            >
+                              {crypto.logo}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Name + symbol */}
+                      <div className="text-center">
+                        <h3
+                          className="text-xl font-bold mb-2"
+                          style={{
+                            color: isDark ? '#FFFFFF' : '#0F172A',
+                            fontFamily: "'Inter', sans-serif",
+                          }}
+                        >
+                          {crypto.name}
+                        </h3>
+                        <div
+                          className="inline-flex items-center justify-center px-4 py-1 rounded-full text-xs font-semibold"
+                          style={{
+                            color: crypto.color,
+                            backgroundColor: `${crypto.color}14`,
+                            border: `1px solid ${crypto.color}2E`,
+                          }}
+                        >
+                          {crypto.symbol}
+                        </div>
+                      </div>
+
+                      {/* Hint */}
+                      <div className="mt-auto text-center">
+                        <p
+                          className="text-sm"
+                          style={{ color: isDark ? '#94A3B8' : '#64748B' }}
+                        >
+                          Click to view address
+                        </p>
+                      </div>
                     </div>
 
-                    {/* Address Label */}
-                    <p
-                      className="text-xs mb-3 uppercase tracking-wider"
-                      style={{ color: isDark ? '#64748B' : '#94A3B8' }}
-                    >
-                      Wallet Address
-                    </p>
-
-                    {/* Address Box */}
+                    {/* Back Side */}
                     <div
-                      className="w-full rounded-xl p-4 mb-4"
+                      className="absolute inset-0 rounded-2xl p-6 border flex flex-col"
                       style={{
-                        backgroundColor: isDark
-                          ? 'rgba(0, 0, 0, 0.4)'
-                          : 'rgba(255, 255, 255, 0.6)',
-                        border: `1px solid ${crypto.color}40`,
+                        background: isDark
+                          ? 'rgba(15, 23, 42, 0.86)'
+                          : 'rgba(255, 255, 255, 0.9)',
+                        backdropFilter: 'blur(22px)',
+                        borderColor: isDark
+                          ? 'rgba(255, 255, 255, 0.08)'
+                          : 'rgba(2, 132, 199, 0.18)',
+                        transform: 'rotateY(180deg)',
+                        backfaceVisibility: 'hidden',
+                        boxShadow: isDark
+                          ? '0 24px 60px rgba(0,0,0,0.34)'
+                          : '0 24px 60px rgba(15,23,42,0.14)',
                       }}
                     >
-                      <p
-                        className="text-xs break-all text-center leading-relaxed"
+                      {/* Address Header */}
+                      <div className="text-center mb-4">
+                        <div
+                          className="inline-flex items-center justify-center px-3 py-1 rounded-full text-xs font-medium mb-3"
+                          style={{
+                            color: crypto.color,
+                            backgroundColor: `${crypto.color}18`,
+                            border: `1px solid ${crypto.color}30`,
+                          }}
+                        >
+                          Wallet Address
+                        </div>
+
+                        <h4
+                          className="text-lg font-bold mb-1"
+                          style={{
+                            color: isDark ? '#FFFFFF' : '#0F172A',
+                            fontFamily: "'Inter', sans-serif",
+                          }}
+                        >
+                          {crypto.name}
+                        </h4>
+                        <p
+                          className="text-xs"
+                          style={{ color: isDark ? '#94A3B8' : '#64748B' }}
+                        >
+                          Tap copy to donate
+                        </p>
+                      </div>
+
+                      {/* Address Box */}
+                      <div
+                        className="rounded-xl p-4 mb-5 border"
                         style={{
-                          color: isDark ? '#FFFFFF' : '#0F172A',
-                          fontFamily: "'JetBrains Mono', monospace",
+                          backgroundColor: isDark
+                            ? 'rgba(0, 0, 0, 0.18)'
+                            : 'rgba(248, 250, 252, 0.82)',
+                          borderColor: `${crypto.color}30`,
                         }}
                       >
-                        {crypto.address}
+                        <p
+                          className="text-xs font-mono"
+                          style={{
+                            color: isDark ? '#E2E8F0' : '#334155',
+                            wordBreak: 'break-all',
+                          }}
+                        >
+                          {crypto.address}
+                        </p>
+                      </div>
+
+                      {/* Copy Button */}
+                      <motion.button
+                        onClick={(e) =>
+                          handleCopy(crypto.address, crypto.id, e)
+                        }
+                        className="w-full py-3 rounded-xl font-semibold flex items-center justify-center gap-2 transition-all duration-200"
+                        style={{
+                          backgroundColor: isCopied
+                            ? 'rgba(34, 197, 94, 0.18)'
+                            : 'rgba(239, 68, 68, 0.92)',
+                          border: `1px solid ${
+                            isCopied
+                              ? 'rgba(34, 197, 94, 0.42)'
+                              : 'rgba(239, 68, 68, 0.35)'
+                          }`,
+                          color: isCopied ? '#22C55E' : '#FFFFFF',
+                          boxShadow: isCopied
+                            ? '0 14px 34px rgba(34, 197, 94, 0.16)'
+                            : '0 14px 34px rgba(239, 68, 68, 0.24)',
+                        }}
+                        whileHover={{
+                          scale: 1.02,
+                          filter: 'brightness(1.05)',
+                        }}
+                        whileTap={{ scale: 0.985 }}
+                      >
+                        {isCopied ? (
+                          <>
+                            <Check className="w-4 h-4" />
+                            Copied!
+                          </>
+                        ) : (
+                          <>
+                            <Copy className="w-4 h-4" />
+                            Copy Address
+                          </>
+                        )}
+                      </motion.button>
+
+                      {/* Hint */}
+                      <p
+                        className="mt-auto pt-5 text-xs text-center"
+                        style={{ color: isDark ? '#64748B' : '#94A3B8' }}
+                      >
+                        Click again to flip back
                       </p>
                     </div>
-
-                    {/* QR Code Placeholder */}
-                    <div
-                      className="w-24 h-24 rounded-lg mb-4 flex items-center justify-center"
-                      style={{
-                        backgroundColor: isDark
-                          ? 'rgba(255, 255, 255, 0.9)'
-                          : '#FFFFFF',
-                        border: `2px solid ${crypto.color}60`,
-                      }}
-                    >
-                      <div
-                        className="w-20 h-20 rounded"
-                        style={{
-                          background: `
-                            repeating-linear-gradient(0deg, ${crypto.color}20 0px, ${crypto.color}20 2px, transparent 2px, transparent 4px),
-                            repeating-linear-gradient(90deg, ${crypto.color}20 0px, ${crypto.color}20 2px, transparent 2px, transparent 4px)
-                          `,
-                        }}
-                      />
-                    </div>
-
-                    {/* Copy Button */}
-                    <button
-                      onClick={(e) => handleCopy(crypto.address, crypto.id, e)}
-                      className="px-6 py-3 rounded-xl font-semibold transition-all duration-300 hover:scale-105 flex items-center gap-2"
-                      style={{
-                        background:
-                          copiedCard === crypto.id
-                            ? 'linear-gradient(135deg, #10B981, #059669)'
-                            : 'linear-gradient(135deg, #EF4444, #DC2626)',
-                        color: '#FFFFFF',
-                        boxShadow:
-                          copiedCard === crypto.id
-                            ? '0 0 20px rgba(16, 185, 129, 0.4)'
-                            : '0 0 20px rgba(239, 68, 68, 0.4)',
-                      }}
-                    >
-                      {copiedCard === crypto.id ? (
-                        <>
-                          <Check className="w-4 h-4" />
-                          Copied!
-                        </>
-                      ) : (
-                        <>
-                          <Copy className="w-4 h-4" />
-                          Copy Address
-                        </>
-                      )}
-                    </button>
-
-                    {/* Hint */}
-                    <p
-                      className="mt-4 text-xs"
-                      style={{ color: isDark ? '#64748B' : '#94A3B8' }}
-                    >
-                      Click again to flip back
-                    </p>
-                  </div>
-                </div>
+                  </motion.div>
+                </motion.div>
               </motion.div>
-            </motion.div>
-          ))}
+            );
+          })}
         </div>
 
         {/* Footer Note */}
         <div
-          className="mt-16 text-center rounded-2xl p-6 border"
+          className="mt-20 text-center rounded-2xl p-8 border w-full"
           style={{
             background: isDark
               ? 'rgba(15, 23, 42, 0.5)'
