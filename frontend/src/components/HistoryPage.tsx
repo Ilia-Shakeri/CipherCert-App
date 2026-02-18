@@ -270,10 +270,10 @@ export function HistoryPage({ isDark }: HistoryPageProps) {
           </p>
         </div>
 
-        <div className="flex gap-3">
+        <div className="flex gap-3 mt-6">
           <button
             onClick={handleExportExcel}
-            className="px-4 py-2 rounded-xl font-semibold transition-all duration-300 hover:scale-105 flex items-center gap-2"
+            className="px-4 py-2 rounded-xl font-semibold transition-all duration-300 hover:scale-105 flex items-center gap-2 cursor-pointer"
             style={{
               background: isDark
                 ? 'rgba(34, 211, 238, 0.1)'
@@ -288,7 +288,7 @@ export function HistoryPage({ isDark }: HistoryPageProps) {
 
           <button
             onClick={handleExportPDF}
-            className="px-4 py-2 rounded-xl font-semibold transition-all duration-300 hover:scale-105 flex items-center gap-2"
+            className="px-4 py-2 rounded-xl font-semibold transition-all duration-300 hover:scale-105 flex items-center gap-2 cursor-pointer"
             style={{
               background: isDark
                 ? 'rgba(34, 211, 238, 0.1)'
@@ -303,7 +303,7 @@ export function HistoryPage({ isDark }: HistoryPageProps) {
 
           <button
             onClick={handleClearHistory}
-            className="px-4 py-2 rounded-xl font-semibold transition-all duration-300 hover:scale-105 flex items-center gap-2"
+            className="px-4 py-2 rounded-xl font-semibold transition-all duration-300 hover:scale-105 flex items-center gap-2 cursor-pointer"
             style={{
               background: 'rgba(239, 68, 68, 0.1)',
               color: '#EF4444',
@@ -317,7 +317,7 @@ export function HistoryPage({ isDark }: HistoryPageProps) {
           <button
             onClick={handleRefresh}
             disabled={loading}
-            className="px-4 py-2 rounded-xl font-semibold transition-all duration-300 hover:scale-105 flex items-center gap-2"
+            className="px-4 py-2 rounded-xl font-semibold transition-all duration-300 hover:scale-105 flex items-center gap-2 cursor-pointer"
             style={{
               background: isDark
                 ? 'rgba(34, 211, 238, 0.1)'

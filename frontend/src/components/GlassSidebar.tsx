@@ -82,21 +82,25 @@ export function GlassSidebar({
 
       {/* Logo Section */}
       <div className="p-6 relative z-10">
-        <div className="flex items-center gap-3">
-          <img src={logoImage} alt="CipherCert Logo" className="w-12 h-12" />
+        <div className="flex items-center flex-col justify-center gap-3">
+          <img
+            src={logoImage}
+            alt="CipherCert Logo"
+            className="w-40 h-40 cursor-pointer"
+          />
           <div>
             <h1
               className="font-bold tracking-tight"
               style={{
                 color: isDark ? '#22D3EE' : '#0891B2',
-                fontSize: '20px',
+                fontSize: '25px',
                 fontFamily: "'JetBrains Mono', 'Inter', monospace",
               }}
             >
               CipherCert
             </h1>
             <p
-              className="text-xs"
+              className="text-s text-center"
               style={{ color: isDark ? '#64748B' : '#94A3B8' }}
             >
               SSL Intelligence
@@ -112,7 +116,7 @@ export function GlassSidebar({
             <button
               key={item.id}
               onClick={() => onTabChange(item.id)}
-              className="w-full text-left px-4 py-3 rounded-xl transition-all duration-300 relative group"
+              className="w-full text-left px-4 py-3 rounded-xl transition-all duration-300 relative group cursor-pointer"
               style={{
                 backgroundColor:
                   activeTab === item.id
@@ -166,7 +170,7 @@ export function GlassSidebar({
         <div className="px-3 mb-3">
           <button
             onClick={() => onTabChange(bottomMenuItem.id)}
-            className="w-full text-left px-4 py-3 rounded-xl transition-all duration-300 relative group overflow-hidden"
+            className="w-full text-left px-4 py-3 rounded-xl transition-all duration-300 relative group overflow-hidden cursor-pointer"
             style={{
               backgroundColor:
                 activeTab === bottomMenuItem.id
@@ -249,14 +253,6 @@ export function GlassSidebar({
               : '1px solid rgba(203, 213, 225, 0.3)',
           }}
         >
-          <div className="flex items-center justify-between mb-2">
-            <span
-              className="text-sm font-medium"
-              style={{ color: isDark ? '#94A3B8' : '#64748B' }}
-            >
-              Theme
-            </span>
-          </div>
           <GlassThemeToggle isDark={isDark} onToggle={onThemeToggle} />
         </div>
       </div>

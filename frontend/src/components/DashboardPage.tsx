@@ -88,79 +88,236 @@ export function DashboardPage({ isDark }: DashboardPageProps) {
       {/* Header with Search */}
       <div className="space-y-6">
         <div>
-          <h1 className="mb-2" style={{ color: isDark ? "#FFFFFF" : "#0F172A", fontSize: "36px", fontWeight: "bold", fontFamily: "'JetBrains Mono', monospace" }}>
+          <h1
+            className="mb-2"
+            style={{
+              color: isDark ? '#FFFFFF' : '#0F172A',
+              fontSize: '36px',
+              fontWeight: 'bold',
+              fontFamily: "'JetBrains Mono', monospace",
+            }}
+          >
             Dashboard
           </h1>
-          <p style={{ color: isDark ? "#64748B" : "#94A3B8" }}>
+          <p style={{ color: isDark ? '#64748B' : '#94A3B8' }}>
             Real-time SSL certificate monitoring and domain intelligence
           </p>
         </div>
 
         {/* Search Bar */}
-        <div className="flex items-center gap-3 px-6 py-4 rounded-2xl border relative overflow-hidden group"
-             style={{ background: isDark ? "rgba(15, 23, 42, 0.5)" : "rgba(255, 255, 255, 0.5)", backdropFilter: "blur(20px)", borderColor: isDark ? "rgba(34, 211, 238, 0.2)" : "rgba(8, 145, 178, 0.2)" }}>
-          <Search className="w-5 h-5 relative z-10" style={{ color: "#22D3EE" }} />
+        <div
+          className="flex items-center gap-3 px-6 py-4 rounded-2xl border relative overflow-hidden group"
+          style={{
+            background: isDark
+              ? 'rgba(15, 23, 42, 0.5)'
+              : 'rgba(255, 255, 255, 0.5)',
+            backdropFilter: 'blur(20px)',
+            borderColor: isDark
+              ? 'rgba(34, 211, 238, 0.2)'
+              : 'rgba(8, 145, 178, 0.2)',
+          }}
+        >
+          <Search
+            className="w-5 h-5 relative z-10"
+            style={{ color: '#22D3EE' }}
+          />
           <input
             type="text"
             placeholder="Enter Domain (e.g. google.com)..."
             value={domainInput}
             onChange={(e) => setDomainInput(e.target.value)}
-            onKeyPress={(e) => e.key === "Enter" && handleScan()}
+            onKeyPress={(e) => e.key === 'Enter' && handleScan()}
             disabled={isScanning}
             className="flex-1 bg-transparent outline-none border-none relative z-10"
-            style={{ color: isDark ? "#FFFFFF" : "#0F172A", fontFamily: "'JetBrains Mono', monospace" }}
+            style={{
+              color: isDark ? '#FFFFFF' : '#0F172A',
+              fontFamily: "'JetBrains Mono', monospace",
+            }}
           />
           <button
             onClick={handleScan}
             disabled={isScanning}
-            className="px-6 py-2 rounded-xl font-semibold transition-all duration-300 flex items-center gap-2 relative z-10 hover:scale-105 disabled:opacity-50 disabled:hover:scale-100"
-            style={{ background: "linear-gradient(135deg, #22D3EE, #06B6D4)", color: "#0F172A", boxShadow: "0 0 20px rgba(34, 211, 238, 0.3)" }}
+            className="px-6 py-2 rounded-xl font-semibold transition-all duration-300 flex items-center gap-2 relative z-10 hover:scale-105 disabled:opacity-50 disabled:hover:scale-100 cursor-pointer"
+            style={{
+              background: 'linear-gradient(135deg, #22D3EE, #06B6D4)',
+              color: '#0F172A',
+              boxShadow: '0 0 20px rgba(34, 211, 238, 0.3)',
+            }}
           >
-            <Scan className={`w-4 h-4 ${isScanning ? "animate-spin" : ""}`} /> 
-            {isScanning ? "SCANNING..." : "SCAN"}
+            <Scan className={`w-4 h-4 ${isScanning ? 'animate-spin' : ''}`} />
+            {isScanning ? 'SCANNING...' : 'SCAN'}
           </button>
         </div>
       </div>
 
       {/* Status Cards (Strictly 3 Columns & Square) */}
       <div className="grid grid-cols-3 gap-6">
-        <StatusCard title="Secure Domains" value={secureDomains} percentage={scannedDomains.length ? Math.round((secureDomains / scannedDomains.length) * 100) : 0} icon={Shield} color="#22D3EE" isDark={isDark} />
-        <StatusCard title="Expired / Critical" value={expiredDomains} percentage={scannedDomains.length ? Math.round((expiredDomains / scannedDomains.length) * 100) : 0} icon={AlertTriangle} color="#EF4444" isDark={isDark} />
-        <StatusCard title="Avg. Security Score" value={avgScore} percentage={avgScore} icon={TrendingUp} color="#10B981" isDark={isDark} />
+        <StatusCard
+          title="Secure Domains"
+          value={secureDomains}
+          percentage={
+            scannedDomains.length
+              ? Math.round((secureDomains / scannedDomains.length) * 100)
+              : 0
+          }
+          icon={Shield}
+          color="#22D3EE"
+          isDark={isDark}
+        />
+        <StatusCard
+          title="Expired / Critical"
+          value={expiredDomains}
+          percentage={
+            scannedDomains.length
+              ? Math.round((expiredDomains / scannedDomains.length) * 100)
+              : 0
+          }
+          icon={AlertTriangle}
+          color="#EF4444"
+          isDark={isDark}
+        />
+        <StatusCard
+          title="Avg. Security Score"
+          value={avgScore}
+          percentage={avgScore}
+          icon={TrendingUp}
+          color="#10B981"
+          isDark={isDark}
+        />
       </div>
 
       {/* Data Table */}
-      <div className="rounded-2xl border overflow-hidden" style={{ background: isDark ? "rgba(15, 23, 42, 0.5)" : "rgba(255, 255, 255, 0.5)", backdropFilter: "blur(20px)", borderColor: isDark ? "rgba(34, 211, 238, 0.2)" : "rgba(8, 145, 178, 0.2)" }}>
-        <div className="p-6 border-b" style={{ borderColor: isDark ? "rgba(34, 211, 238, 0.1)" : "rgba(0,0,0,0.1)" }}>
-            <h3 className="font-bold text-xl" style={{ color: isDark ? "#FFFFFF" : "#0F172A" }}>Recent Scans</h3>
+      <div
+        className="rounded-2xl border overflow-hidden"
+        style={{
+          background: isDark
+            ? 'rgba(15, 23, 42, 0.5)'
+            : 'rgba(255, 255, 255, 0.5)',
+          backdropFilter: 'blur(20px)',
+          borderColor: isDark
+            ? 'rgba(34, 211, 238, 0.2)'
+            : 'rgba(8, 145, 178, 0.2)',
+        }}
+      >
+        <div
+          className="p-6 border-b"
+          style={{
+            borderColor: isDark ? 'rgba(34, 211, 238, 0.1)' : 'rgba(0,0,0,0.1)',
+          }}
+        >
+          <h3
+            className="font-bold text-xl"
+            style={{ color: isDark ? '#FFFFFF' : '#0F172A' }}
+          >
+            Recent Scans
+          </h3>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr style={{ backgroundColor: isDark ? "rgba(15, 23, 42, 0.8)" : "rgba(248, 250, 252, 0.8)", borderBottom: isDark ? "1px solid #1E293B" : "1px solid #E2E8F0" }}>
-                <th className="px-6 py-4 text-left text-sm font-semibold" style={{ color: isDark ? "#94A3B8" : "#64748B" }}>Status</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold" style={{ color: isDark ? "#94A3B8" : "#64748B" }}>Domain Name</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold" style={{ color: isDark ? "#94A3B8" : "#64748B" }}>Issuer</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold" style={{ color: isDark ? "#94A3B8" : "#64748B" }}>Expiry Date</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold" style={{ color: isDark ? "#94A3B8" : "#64748B" }}>Grade</th>
+              <tr
+                style={{
+                  backgroundColor: isDark
+                    ? 'rgba(15, 23, 42, 0.8)'
+                    : 'rgba(248, 250, 252, 0.8)',
+                  borderBottom: isDark
+                    ? '1px solid #1E293B'
+                    : '1px solid #E2E8F0',
+                }}
+              >
+                <th
+                  className="px-6 py-4 text-left text-sm font-semibold"
+                  style={{ color: isDark ? '#94A3B8' : '#64748B' }}
+                >
+                  Status
+                </th>
+                <th
+                  className="px-6 py-4 text-left text-sm font-semibold"
+                  style={{ color: isDark ? '#94A3B8' : '#64748B' }}
+                >
+                  Domain Name
+                </th>
+                <th
+                  className="px-6 py-4 text-left text-sm font-semibold"
+                  style={{ color: isDark ? '#94A3B8' : '#64748B' }}
+                >
+                  Issuer
+                </th>
+                <th
+                  className="px-6 py-4 text-left text-sm font-semibold"
+                  style={{ color: isDark ? '#94A3B8' : '#64748B' }}
+                >
+                  Expiry Date
+                </th>
+                <th
+                  className="px-6 py-4 text-left text-sm font-semibold"
+                  style={{ color: isDark ? '#94A3B8' : '#64748B' }}
+                >
+                  Grade
+                </th>
               </tr>
             </thead>
             <tbody>
               {scannedDomains.map((domain, index) => (
-                <tr key={index} className="transition-all duration-200 hover:bg-opacity-50" style={{ backgroundColor: index % 2 === 0 ? (isDark ? "rgba(15, 23, 42, 0.3)" : "rgba(248, 250, 252, 0.3)") : "transparent", borderBottom: isDark ? "1px solid #1E293B" : "1px solid #E2E8F0" }}>
+                <tr
+                  key={index}
+                  className="transition-all duration-200 hover:bg-opacity-50"
+                  style={{
+                    backgroundColor:
+                      index % 2 === 0
+                        ? isDark
+                          ? 'rgba(15, 23, 42, 0.3)'
+                          : 'rgba(248, 250, 252, 0.3)'
+                        : 'transparent',
+                    borderBottom: isDark
+                      ? '1px solid #1E293B'
+                      : '1px solid #E2E8F0',
+                  }}
+                >
                   <td className="px-6 py-4">{getStatusBadge(domain.status)}</td>
-                  <td className="px-6 py-4 font-medium" style={{ color: isDark ? "#FFFFFF" : "#0F172A" }}>{domain.domain}</td>
-                  <td className="px-6 py-4" style={{ color: isDark ? "#CBD5E1" : "#475569" }}>{domain.issuer}</td>
-                  <td className="px-6 py-4" style={{ color: isDark ? "#CBD5E1" : "#475569" }}>{domain.expiryDate}</td>
-                  <td className="px-6 py-4 font-bold" style={{ color: ["A", "A+"].includes(domain.grade) ? "#10B981" : ["B", "C"].includes(domain.grade) ? "#FBBF24" : "#EF4444" }}>{domain.grade}</td>
+                  <td
+                    className="px-6 py-4 font-medium"
+                    style={{ color: isDark ? '#FFFFFF' : '#0F172A' }}
+                  >
+                    {domain.domain}
+                  </td>
+                  <td
+                    className="px-6 py-4"
+                    style={{ color: isDark ? '#CBD5E1' : '#475569' }}
+                  >
+                    {domain.issuer}
+                  </td>
+                  <td
+                    className="px-6 py-4"
+                    style={{ color: isDark ? '#CBD5E1' : '#475569' }}
+                  >
+                    {domain.expiryDate}
+                  </td>
+                  <td
+                    className="px-6 py-4 font-bold"
+                    style={{
+                      color: ['A', 'A+'].includes(domain.grade)
+                        ? '#10B981'
+                        : ['B', 'C'].includes(domain.grade)
+                          ? '#FBBF24'
+                          : '#EF4444',
+                    }}
+                  >
+                    {domain.grade}
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
           {scannedDomains.length === 0 && (
-            <div className="p-12 text-center flex flex-col items-center justify-center gap-2" style={{ color: isDark ? "#64748B" : "#94A3B8" }}>
-               <Search className="w-10 h-10 opacity-20" />
-               <p>No scans in this session yet. Enter a domain above to start.</p>
+            <div
+              className="p-12 text-center flex flex-col items-center justify-center gap-2"
+              style={{ color: isDark ? '#64748B' : '#94A3B8' }}
+            >
+              <Search className="w-10 h-10 opacity-20" />
+              <p>
+                No scans in this session yet. Enter a domain above to start.
+              </p>
             </div>
           )}
         </div>

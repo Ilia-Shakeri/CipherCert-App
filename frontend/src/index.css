@@ -852,8 +852,15 @@
     height: calc(var(--spacing) * 32);
   }
 
+  .h-40 {
+    height: calc(var(--spacing) * 40);
+  }
+
   .h-screen {
-    height: 100vh;
+    height: 100vh !important;
+  }
+  .h-full {
+    height: 100%;
   }
 
   .min-h-screen {
@@ -912,6 +919,10 @@
     width: calc(var(--spacing) * 30);
   }
 
+  .w-40 {
+    width: calc(var(--spacing) * 40);
+  }
+
   .w-\[240px\] {
     width: 240px;
   }
@@ -922,6 +933,10 @@
 
   .flex-1 {
     flex: 1;
+  }
+
+  .justify-center {
+    justify-content: center;
   }
 
   .flex-shrink-0 {
