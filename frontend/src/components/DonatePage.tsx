@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Heart, Copy, Check } from 'lucide-react';
-import { motion } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner@2.0.3';
 
 // Import your crypto logos from the assets directory
@@ -47,6 +47,9 @@ interface CryptoCard {
 export function DonatePage({ isDark }: DonatePageProps) {
   const [flippedCards, setFlippedCards] = useState<Set<string>>(new Set());
   const [copiedCard, setCopiedCard] = useState<string | null>(null);
+
+  // Tracks which card's QR is expanded (null = closed)
+  const [expandedQrCardId, setExpandedQrCardId] = useState<string | null>(null);
 
   const cryptoCards: CryptoCard[] = [
     {
@@ -105,6 +108,9 @@ export function DonatePage({ isDark }: DonatePageProps) {
   ];
 
   const handleCardClick = (cardId: string) => {
+    // Don't flip the card while the QR overlay is open
+    if (expandedQrCardId) return;
+
     setFlippedCards((prev) => {
       const newSet = new Set(prev);
       if (newSet.has(cardId)) {
@@ -131,6 +137,14 @@ export function DonatePage({ isDark }: DonatePageProps) {
       toast.error('Failed to copy address');
     }
   };
+
+  const toggleQr = (cardId: string) => {
+    setExpandedQrCardId((prev) => (prev === cardId ? null : cardId));
+  };
+
+  const expandedCrypto = expandedQrCardId
+    ? cryptoCards.find((c) => c.id === expandedQrCardId)
+    : null;
 
   return (
     <div className="min-h-screen p-8 flex items-center justify-center">
@@ -376,27 +390,51 @@ export function DonatePage({ isDark }: DonatePageProps) {
                     </div>
 
                     {/* Wallet QR Code */}
-                    <div
-                      className="w-24 h-24 rounded-lg mb-4 flex items-center justify-center overflow-hidden"
+                    <motion.div
+                      onClick={(e) => {
+                        e.stopPropagation(); // Prevent card flip when clicking QR
+                        toggleQr(crypto.id);
+                      }}
+                      className="rounded-lg mb-4 flex items-center justify-center overflow-hidden cursor-zoom-in select-none"
                       style={{
                         backgroundColor: isDark
                           ? 'rgba(255, 255, 255, 0.9)'
                           : '#FFFFFF',
                         border: `2px solid ${crypto.color}60`,
                       }}
+                      animate={{
+                        width: expandedQrCardId === crypto.id ? 140 : 120,
+                        height: expandedQrCardId === crypto.id ? 140 : 120,
+                      }}
+                      transition={{
+                        type: 'spring',
+                        stiffness: 260,
+                        damping: 22,
+                      }}
                     >
                       {crypto.qrUrl ? (
-                        <img
+                        <motion.img
                           src={crypto.qrUrl}
                           alt={`${crypto.name} wallet QR code`}
-                          className="w-20 h-20 object-contain"
                           draggable={false}
+                          className="object-contain"
+                          animate={{
+                            width: expandedQrCardId === crypto.id ? 120 : 96,
+                            height: expandedQrCardId === crypto.id ? 120 : 96,
+                          }}
+                          transition={{
+                            type: 'spring',
+                            stiffness: 260,
+                            damping: 22,
+                          }}
                         />
                       ) : (
                         // Fallback keeps the layout intact if an image is missing
                         <div
-                          className="w-20 h-20 rounded"
+                          className="rounded"
                           style={{
+                            width: expandedQrCardId === crypto.id ? 120 : 96,
+                            height: expandedQrCardId === crypto.id ? 120 : 96,
                             background: `
           repeating-linear-gradient(0deg, ${crypto.color}20 0px, ${crypto.color}20 2px, transparent 2px, transparent 4px),
           repeating-linear-gradient(90deg, ${crypto.color}20 0px, ${crypto.color}20 2px, transparent 2px, transparent 4px)
@@ -404,7 +442,7 @@ export function DonatePage({ isDark }: DonatePageProps) {
                           }}
                         />
                       )}
-                    </div>
+                    </motion.div>
 
                     {/* Copy Button */}
                     <motion.button
@@ -479,6 +517,60 @@ export function DonatePage({ isDark }: DonatePageProps) {
           </p>
         </div>
       </div>
+
+      {/* QR Overlay (click outside to close) */}
+      <AnimatePresence>
+        {expandedQrCardId && expandedCrypto?.qrUrl && (
+          <motion.div
+            className="fixed inset-0 z-[9999] flex items-center justify-center p-6"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setExpandedQrCardId(null)}
+            style={{
+              backgroundColor: isDark
+                ? 'rgba(0, 0, 0, 0.6)'
+                : 'rgba(15, 23, 42, 0.35)',
+              backdropFilter: 'blur(6px)',
+            }}
+          >
+            <motion.div
+              initial={{ scale: 0.92, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.94, opacity: 0 }}
+              transition={{ type: 'spring', stiffness: 240, damping: 20 }}
+              onClick={(e) => e.stopPropagation()}
+              className="rounded-2xl overflow-hidden"
+              style={{
+                backgroundColor: isDark ? 'rgba(255,255,255,0.95)' : '#FFFFFF',
+                border: '1px solid rgba(255,255,255,0.12)',
+                boxShadow: '0 20px 60px rgba(0,0,0,0.45)',
+              }}
+            >
+              <div className="p-5">
+                <div
+                  className="text-center mb-3"
+                  style={{ color: isDark ? '#0F172A' : '#0F172A' }}
+                >
+                  <div className="text-sm font-semibold">Scan to donate❤️</div>
+                  <div className="text-xs opacity-70 mt-1">
+                    Click outside to close
+                  </div>
+                </div>
+
+                <div className="w-[340px] h-[340px] flex items-center justify-center">
+                  <img
+                    src={expandedCrypto.qrUrl}
+                    alt={`${expandedCrypto.name} wallet QR code`}
+                    className="w-[320px] h-[320px] object-contain"
+                    draggable={false}
+                  />
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
