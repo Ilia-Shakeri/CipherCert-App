@@ -118,7 +118,7 @@ export default function App() {
 
         {/* Toast Notifications */}
         <Toaster
-          position="top-right"
+          position="bottom-right"
           theme={isDark ? 'dark' : 'light'}
           richColors
         />
