@@ -6,6 +6,10 @@ from models import init_db, save_report, get_all_history, clear_all_history
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 from datetime import datetime, timedelta
+import os
+import smtplib
+from email.message import EmailMessage
+import anyio
 
 # Initialize DB
 init_db()
@@ -58,6 +62,56 @@ def format_result(report):
         "score": report.score,
         "timestamp": scan_time 
     }
+
+class EmailTestRequest(BaseModel):
+    to: list[str]
+    subject: str
+    body: str
+
+def _send_email_smtp(to: list[str], subject: str, body: str):
+    host = os.getenv("SMTP_HOST", "").strip()
+    port = int(os.getenv("SMTP_PORT", "587").strip())
+    user = os.getenv("SMTP_USER", "").strip()
+    password = os.getenv("SMTP_PASS", "").strip()
+    from_addr = os.getenv("SMTP_FROM", user).strip()
+
+    use_tls = os.getenv("SMTP_TLS", "true").lower() in ("1", "true", "yes")
+    use_ssl = os.getenv("SMTP_SSL", "false").lower() in ("1", "true", "yes")
+
+    if not host or not from_addr:
+        raise Exception("SMTP is not configured (set SMTP_HOST and SMTP_FROM/SMTP_USER).")
+
+    msg = EmailMessage()
+    msg["From"] = from_addr
+    msg["To"] = ", ".join(to)
+    msg["Subject"] = subject
+    msg.set_content(body)
+
+    if use_ssl:
+        with smtplib.SMTP_SSL(host, port, timeout=15) as server:
+            if user:
+                server.login(user, password)
+            server.send_message(msg)
+    else:
+        with smtplib.SMTP(host, port, timeout=15) as server:
+            server.ehlo()
+            if use_tls:
+                server.starttls()
+                server.ehlo()
+            if user:
+                server.login(user, password)
+            server.send_message(msg)
+
+@app.post("/api/notifications/email/test")
+async def send_test_email(req: EmailTestRequest):
+    if not req.to:
+        raise HTTPException(status_code=400, detail="No recipients provided")
+    try:
+        # Run blocking SMTP in a thread
+        await anyio.to_thread.run_sync(_send_email_smtp, req.to, req.subject, req.body)
+        return {"ok": True}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/api/scan")
 async def scan_domain(request: ScanRequest):

@@ -1,3 +1,5 @@
+// frontend/src/App.tsx
+
 import { useState, useEffect } from 'react';
 import { GlassSidebar } from './components/GlassSidebar';
 import { DashboardPage } from './components/DashboardPage';
@@ -9,11 +11,40 @@ import { SettingsPage } from './components/SettingsPage';
 import { Toaster } from 'sonner@2.0.3';
 import AppHeader from './components/AppHeader';
 
+import {
+  applySettingsToDom,
+  loadSettings,
+  saveSettings,
+  type AppSettings,
+} from './lib/settings';
+import {
+  loadAutomationRules,
+  saveAutomationRules,
+  type AutomationRule,
+} from './lib/automation';
+
+const THEME_STORAGE_KEY = 'ciphercert_theme_v1';
+
 export default function App() {
-  const [isDark, setIsDark] = useState(true);
+  const [isDark, setIsDark] = useState<boolean>(() => {
+    const raw = localStorage.getItem(THEME_STORAGE_KEY);
+    if (!raw) return true;
+    return raw === 'dark';
+  });
+
   const [activeTab, setActiveTab] = useState('dashboard');
 
-  // همگام‌سازی تم با الکترون
+  const [settings, setSettings] = useState<AppSettings>(() => loadSettings());
+  const [rules, setRules] = useState<AutomationRule[]>(() =>
+    loadAutomationRules()
+  );
+
+  // Persist theme
+  useEffect(() => {
+    localStorage.setItem(THEME_STORAGE_KEY, isDark ? 'dark' : 'light');
+  }, [isDark]);
+
+  // Sync theme with Electron (if running in Electron)
   useEffect(() => {
     // @ts-ignore
     if (window.require) {
@@ -21,34 +52,56 @@ export default function App() {
         // @ts-ignore
         const { ipcRenderer } = window.require('electron');
         ipcRenderer.send('theme-changed', isDark ? 'dark' : 'light');
-      } catch (error) {
-        console.log('Browser mode');
+      } catch {
+        // Browser mode
       }
     }
   }, [isDark]);
+
+  // Persist + apply settings globally
+  useEffect(() => {
+    saveSettings(settings);
+    applySettingsToDom(settings);
+  }, [settings]);
+
+  // Persist automation rules
+  useEffect(() => {
+    saveAutomationRules(rules);
+  }, [rules]);
 
   const renderPage = () => {
     switch (activeTab) {
       case 'dashboard':
         return <DashboardPage isDark={isDark} />;
       case 'bulk-scan':
-        return <BulkScanPage isDark={isDark} />;
+        return (
+          <BulkScanPage
+            isDark={isDark}
+            maxConcurrent={settings.scanning.maxConcurrent}
+          />
+        );
       case 'history':
         return <HistoryPage isDark={isDark} />;
       case 'automation':
-        return <AutomationPage isDark={isDark} />;
+        return (
+          <AutomationPage isDark={isDark} rules={rules} setRules={setRules} />
+        );
       case 'donate':
         return <DonatePage isDark={isDark} />;
       case 'settings':
-        return <SettingsPage isDark={isDark} />;
+        return (
+          <SettingsPage
+            isDark={isDark}
+            settings={settings}
+            setSettings={setSettings}
+          />
+        );
       default:
         return <DashboardPage isDark={isDark} />;
     }
   };
 
-  const handleRefresh = () => {
-    window.location.reload();
-  };
+  const handleRefresh = () => window.location.reload();
 
   return (
     <div className={isDark ? 'dark' : ''}>
@@ -60,7 +113,7 @@ export default function App() {
             "'Inter', 'JetBrains Mono', -apple-system, system-ui, sans-serif",
         }}
       >
-        {/* --- پس‌زمینه --- */}
+        {/* Background */}
         <div
           className="fixed inset-0 pointer-events-none z-0"
           style={{
@@ -77,8 +130,7 @@ export default function App() {
           }}
         />
 
-        {/* --- لایه محافظ درگ (Safety Drag Layer) --- */}
-        {/* اگر هدر کار نکرد، این نوار نامرئی بالای صفحه همیشه پنجره را جابجا می‌کند */}
+        {/* Safety drag layer (Electron) */}
         <div
           style={{
             position: 'fixed',
@@ -86,21 +138,19 @@ export default function App() {
             left: 0,
             right: 0,
             height: '40px',
-            zIndex: 9999, // بالاترین اولویت
+            zIndex: 9999,
             WebkitAppRegion: 'drag',
-            pointerEvents: 'none', // اجازه می‌دهد کلیک‌ها رد شوند و به دکمه‌ها برسند
+            pointerEvents: 'none',
           }}
         />
 
-        {/* --- هدر برنامه --- */}
+        {/* Header */}
         <div className="fixed top-0 left-0 right-0 z-50">
           <AppHeader onRefresh={handleRefresh} />
         </div>
 
-        {/* --- بدنه اصلی برنامه --- */}
-        {/* پدینگ بالا (pt-12) باعث می‌شود محتوا زیر هدر نرود */}
+        {/* Main layout */}
         <div className="flex h-screen pt-10 relative z-10">
-          {/* سایدبار */}
           <div className="h-full">
             <GlassSidebar
               activeTab={activeTab}
@@ -110,13 +160,11 @@ export default function App() {
             />
           </div>
 
-          {/* محتوای صفحات */}
           <div className="flex-1 overflow-auto relative z-10">
             {renderPage()}
           </div>
         </div>
 
-        {/* Toast Notifications */}
         <Toaster
           position="bottom-right"
           theme={isDark ? 'dark' : 'light'}
