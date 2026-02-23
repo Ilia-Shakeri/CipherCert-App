@@ -34,8 +34,67 @@ export const DEFAULT_RULES: AutomationRule[] = [
   },
 ];
 
+function normalizeRule(
+  value: unknown,
+  index: number
+): AutomationRule | null {
+  if (!value || typeof value !== "object") return null;
+
+  const record = value as Record<string, unknown>;
+  const idRaw = record.id;
+  const nameRaw = record.name;
+  const triggerRaw = record.trigger;
+  const actionRaw = record.action;
+  const enabledRaw = record.enabled;
+  const scheduleRaw = record.schedule;
+  const targetsRaw = record.targets;
+
+  const id =
+    typeof idRaw === "string" && idRaw.trim()
+      ? idRaw
+      : `${Date.now()}-${index}`;
+  const name =
+    typeof nameRaw === "string" && nameRaw.trim() ? nameRaw : "Untitled Rule";
+  const trigger =
+    typeof triggerRaw === "string" && triggerRaw.trim()
+      ? triggerRaw
+      : "Manual trigger";
+  const action =
+    typeof actionRaw === "string" && actionRaw.trim()
+      ? actionRaw
+      : "Send email notification";
+  const enabled = typeof enabledRaw === "boolean" ? enabledRaw : true;
+  const schedule =
+    typeof scheduleRaw === "string" && scheduleRaw.trim()
+      ? scheduleRaw
+      : "Manual";
+  const targets = Array.isArray(targetsRaw)
+    ? targetsRaw
+        .filter((item): item is string => typeof item === "string")
+        .map((item) => item.trim())
+        .filter(Boolean)
+    : [];
+
+  return {
+    id,
+    name,
+    trigger,
+    action,
+    enabled,
+    schedule,
+    targets,
+  };
+}
+
 export function loadAutomationRules(): AutomationRule[] {
-  return loadJson<AutomationRule[]>(AUTOMATION_STORAGE_KEY, DEFAULT_RULES);
+  const stored = loadJson<unknown[]>(AUTOMATION_STORAGE_KEY, DEFAULT_RULES);
+  if (!Array.isArray(stored)) return DEFAULT_RULES;
+
+  const normalized = stored
+    .map((rule, index) => normalizeRule(rule, index))
+    .filter((rule): rule is AutomationRule => rule !== null);
+
+  return normalized.length > 0 ? normalized : DEFAULT_RULES;
 }
 
 export function saveAutomationRules(rules: AutomationRule[]): void {

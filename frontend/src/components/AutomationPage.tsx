@@ -291,7 +291,9 @@ export function AutomationPage({
 
       {/* Rules List */}
       <div className="space-y-4">
-        {rules.map((rule) => (
+        {(Array.isArray(rules) ? rules : []).map((rule) => {
+          const safeTargets = Array.isArray(rule.targets) ? rule.targets : [];
+          return (
           <div
             key={rule.id}
             className="rounded-2xl p-6 border transition-all duration-300 hover:scale-[1.02]"
@@ -345,7 +347,7 @@ export function AutomationPage({
                       className="text-sm"
                       style={{ color: isDark ? '#64748B' : '#94A3B8' }}
                     >
-                      {rule.schedule} • {rule.targets.length} target(s)
+                      {rule.schedule} • {safeTargets.length} target(s)
                     </p>
                   </div>
                 </div>
@@ -380,7 +382,7 @@ export function AutomationPage({
                     className="text-xs"
                     style={{ color: isDark ? '#64748B' : '#94A3B8' }}
                   >
-                    Targets: {rule.targets.join(', ')}
+                    Targets: {safeTargets.join(', ')}
                   </div>
                 </div>
               </div>
@@ -443,7 +445,8 @@ export function AutomationPage({
               </div>
             </div>
           </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
