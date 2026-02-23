@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { Dispatch, SetStateAction } from 'react';
-import { Plus, Trash2, Bell, Mail, Zap, Clock } from 'lucide-react';
+import { Plus, Trash2, Bell, Mail, Zap, Clock, Pencil } from 'lucide-react';
 import { toast } from 'sonner@2.0.3';
 import type { AutomationRule } from '../lib/automation';
 import { TargetPicker } from './TargetPicker';
@@ -17,6 +17,7 @@ export function AutomationPage({
   setRules,
 }: AutomationPageProps) {
   const [showNewRuleForm, setShowNewRuleForm] = useState(false);
+  const [editingRuleId, setEditingRuleId] = useState<string | null>(null);
   const [newRule, setNewRule] = useState({
     name: '',
     trigger: '',
@@ -24,6 +25,25 @@ export function AutomationPage({
     schedule: '',
     targets: [] as string[],
   });
+
+  const resetRuleForm = () => {
+    setNewRule({
+      name: '',
+      trigger: '',
+      action: '',
+      schedule: '',
+      targets: [],
+    });
+    setEditingRuleId(null);
+  };
+
+  const handleToggleRuleForm = () => {
+    setShowNewRuleForm((prev) => {
+      const next = !prev;
+      if (!next) resetRuleForm();
+      return next;
+    });
+  };
 
   const handleToggleRule = (id: string) => {
     setRules((prev) => {
@@ -39,6 +59,11 @@ export function AutomationPage({
   };
 
   const handleDeleteRule = (id: string) => {
+    if (editingRuleId === id) {
+      setShowNewRuleForm(false);
+      resetRuleForm();
+    }
+
     setRules((prev) => {
       const rule = prev.find((r) => r.id === id);
       const next = prev.filter((r) => r.id !== id);
@@ -47,7 +72,22 @@ export function AutomationPage({
     });
   };
 
-  const handleAddRule = () => {
+  const handleEditRule = (id: string) => {
+    const rule = rules.find((r) => r.id === id);
+    if (!rule) return;
+
+    setEditingRuleId(id);
+    setNewRule({
+      name: rule.name ?? '',
+      trigger: rule.trigger ?? '',
+      action: rule.action ?? '',
+      schedule: rule.schedule ?? '',
+      targets: Array.isArray(rule.targets) ? rule.targets : [],
+    });
+    setShowNewRuleForm(true);
+  };
+
+  const handleSaveRule = () => {
     if (!newRule.name || !newRule.trigger || !newRule.action) {
       toast.error('Please fill in all fields');
       return;
@@ -58,26 +98,39 @@ export function AutomationPage({
       return;
     }
 
-    const rule: AutomationRule = {
-      id: Date.now().toString(),
-      name: newRule.name,
-      trigger: newRule.trigger,
-      action: newRule.action,
-      enabled: true,
-      schedule: newRule.schedule || 'Manual',
-      targets: newRule.targets,
-    };
+    if (editingRuleId) {
+      setRules((prev) =>
+        prev.map((rule) =>
+          rule.id === editingRuleId
+            ? {
+                ...rule,
+                name: newRule.name,
+                trigger: newRule.trigger,
+                action: newRule.action,
+                schedule: newRule.schedule || 'Manual',
+                targets: newRule.targets,
+              }
+            : rule
+        )
+      );
+      toast.success('Automation rule updated');
+    } else {
+      const rule: AutomationRule = {
+        id: Date.now().toString(),
+        name: newRule.name,
+        trigger: newRule.trigger,
+        action: newRule.action,
+        enabled: true,
+        schedule: newRule.schedule || 'Manual',
+        targets: newRule.targets,
+      };
 
-    setRules((prev) => [...prev, rule]); // IMPORTANT: correct spread
-    setNewRule({
-      name: '',
-      trigger: '',
-      action: '',
-      schedule: '',
-      targets: [],
-    });
+      setRules((prev) => [...prev, rule]);
+      toast.success('Automation rule created');
+    }
+
+    resetRuleForm();
     setShowNewRuleForm(false);
-    toast.success('Automation rule created');
   };
 
   return (
@@ -102,7 +155,7 @@ export function AutomationPage({
         </div>
 
         <button
-          onClick={() => setShowNewRuleForm(!showNewRuleForm)}
+          onClick={handleToggleRuleForm}
           className="px-6 py-3 rounded-xl font-semibold transition-all duration-300 hover:scale-105 flex items-center gap-2 mt-6 cursor-pointer"
           style={{
             background: 'linear-gradient(135deg, #22D3EE, #06B6D4)',
@@ -133,7 +186,7 @@ export function AutomationPage({
             className="font-bold mb-4"
             style={{ color: isDark ? '#FFFFFF' : '#0F172A', fontSize: '20px' }}
           >
-            Create New Automation Rule
+            {editingRuleId ? 'Edit Automation Rule' : 'Create New Automation Rule'}
           </h3>
 
           <div>
@@ -264,17 +317,20 @@ export function AutomationPage({
 
           <div className="flex gap-3 pt-2">
             <button
-              onClick={handleAddRule}
+              onClick={handleSaveRule}
               className="px-6 py-3 rounded-xl font-semibold transition-all duration-300 hover:scale-105"
               style={{
                 background: 'linear-gradient(135deg, #22D3EE, #06B6D4)',
                 color: '#0F172A',
               }}
             >
-              Create Rule
+              {editingRuleId ? 'Save Changes' : 'Create Rule'}
             </button>
             <button
-              onClick={() => setShowNewRuleForm(false)}
+              onClick={() => {
+                setShowNewRuleForm(false);
+                resetRuleForm();
+              }}
               className="px-6 py-3 rounded-xl font-semibold transition-all duration-300"
               style={{
                 backgroundColor: isDark
@@ -347,7 +403,7 @@ export function AutomationPage({
                       className="text-sm"
                       style={{ color: isDark ? '#64748B' : '#94A3B8' }}
                     >
-                      {rule.schedule} • {safeTargets.length} target(s)
+                      {rule.schedule} - {safeTargets.length} target(s)
                     </p>
                   </div>
                 </div>
@@ -406,8 +462,25 @@ export function AutomationPage({
                 </button>
 
                 <button
+                  onClick={() => handleEditRule(rule.id)}
+                  className="p-2 rounded-lg transition-all duration-200 hover:scale-110 cursor-pointer"
+                  style={{
+                    backgroundColor: isDark
+                      ? 'rgba(34, 211, 238, 0.12)'
+                      : 'rgba(8, 145, 178, 0.12)',
+                    border: isDark
+                      ? '1px solid rgba(34, 211, 238, 0.28)'
+                      : '1px solid rgba(8, 145, 178, 0.28)',
+                    color: isDark ? '#22D3EE' : '#0891B2',
+                  }}
+                  title="Edit rule"
+                >
+                  <Pencil className="w-4 h-4" />
+                </button>
+
+                <button
                   onClick={() => handleDeleteRule(rule.id)}
-                  className="p-2 rounded-lg transition-all duration-200 hover:scale-110"
+                  className="p-2 rounded-lg transition-all duration-200 hover:scale-110 cursor-pointer"
                   style={{
                     backgroundColor: 'rgba(239, 68, 68, 0.1)',
                     color: '#EF4444',

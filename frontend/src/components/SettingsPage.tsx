@@ -1,10 +1,9 @@
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import type { Dispatch, SetStateAction } from 'react';
 import { toast } from 'sonner@2.0.3';
-import { Bell, Key, Database, Eye, EyeOff, Send } from 'lucide-react';
+import { Bell, Database, Send } from 'lucide-react';
 import type { AppSettings } from '../lib/settings';
 import { TargetPicker } from './TargetPicker';
-import type { AppSettings } from '../lib/settings';
 
 interface SettingsPageProps {
   isDark: boolean;
@@ -22,8 +21,6 @@ export function SettingsPage({
   settings,
   setSettings,
 }: SettingsPageProps) {
-  const [showApiKey, setShowApiKey] = useState(false);
-
   const recipientsText = useMemo(
     () => settings.notifications.emailRecipients.join(', '),
     [settings.notifications.emailRecipients]
@@ -31,26 +28,6 @@ export function SettingsPage({
 
   const handleSave = () => {
     toast.success('Settings saved successfully');
-  };
-
-  const handleCopyApiKey = async () => {
-    try {
-      await navigator.clipboard.writeText(settings.apiKey);
-      toast.success('API key copied to clipboard');
-    } catch {
-      toast.error('Clipboard copy failed');
-    }
-  };
-
-  const handleRegenerateApiKey = () => {
-    // Demo key generator (client-side). Replace with real backend issuance later.
-    const bytes = new Uint8Array(16);
-    crypto.getRandomValues(bytes);
-    const token = Array.from(bytes)
-      .map((b) => b.toString(16).padStart(2, '0'))
-      .join('');
-    setSettings((prev) => ({ ...prev, apiKey: `sk_live_${token}` }));
-    toast.success('Generated new API key');
   };
 
   const addRecipient = (email: string) => {
@@ -415,72 +392,6 @@ export function SettingsPage({
         </div>
       </SettingSection>
 
-      {/* API */}
-      <SettingSection icon={Key} title="API Access">
-        <div className="space-y-4">
-          <div>
-            <label
-              className="block mb-2 text-sm font-semibold"
-              style={{ color: isDark ? '#94A3B8' : '#64748B' }}
-            >
-              API Key
-            </label>
-
-            <div className="flex gap-2">
-              <div className="relative flex-1">
-                <input
-                  type={showApiKey ? 'text' : 'password'}
-                  value={settings.apiKey}
-                  readOnly
-                  className="w-full px-4 py-3 rounded-xl border bg-transparent outline-none font-mono pr-12"
-                  style={{
-                    borderColor: isDark
-                      ? 'rgba(34, 211, 238, 0.2)'
-                      : 'rgba(8, 145, 178, 0.2)',
-                    color: isDark ? '#CBD5E1' : '#475569',
-                  }}
-                />
-                <button
-                  onClick={() => setShowApiKey((s) => !s)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2"
-                  style={{ color: isDark ? '#94A3B8' : '#64748B' }}
-                  title={showApiKey ? 'Hide' : 'Show'}
-                >
-                  {showApiKey ? (
-                    <EyeOff className="w-5 h-5" />
-                  ) : (
-                    <Eye className="w-5 h-5" />
-                  )}
-                </button>
-              </div>
-
-              <button
-                onClick={handleCopyApiKey}
-                className="px-4 py-3 rounded-xl font-semibold transition-all duration-300 cursor-pointer"
-                style={{
-                  backgroundColor: 'rgba(34, 211, 238, 0.1)',
-                  color: '#22D3EE',
-                  border: '1px solid rgba(34, 211, 238, 0.3)',
-                }}
-              >
-                Copy
-              </button>
-
-              <button
-                onClick={handleRegenerateApiKey}
-                className="px-4 py-3 rounded-xl font-semibold transition-all duration-300 cursor-pointer"
-                style={{
-                  backgroundColor: 'rgba(239, 68, 68, 0.1)',
-                  color: '#EF4444',
-                  border: '1px solid rgba(239, 68, 68, 0.3)',
-                }}
-              >
-                Regenerate
-              </button>
-            </div>
-          </div>
-        </div>
-      </SettingSection>
     </div>
   );
 }

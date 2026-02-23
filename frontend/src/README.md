@@ -72,7 +72,6 @@ A high-end SSL Security & Domain Intelligence Dashboard built with React, featur
   - Accent color picker (5 preset colors)
   - Font size adjustment
   - Animation controls
-- **API Access**: View, copy, and regenerate API keys
 
 ### 🎛️ Theme Toggle
 - **iOS-Style Switch**: Smooth pill-shaped toggle
