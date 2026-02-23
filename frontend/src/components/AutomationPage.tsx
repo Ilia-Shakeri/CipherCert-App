@@ -1,125 +1,162 @@
-import { useState } from "react";
-import { Plus, Trash2, Bell, Mail, Zap, Clock } from "lucide-react";
-import { toast } from "sonner@2.0.3";
-
-interface AutomationRule {
-  id: string;
-  name: string;
-  trigger: string;
-  action: string;
-  enabled: boolean;
-  schedule?: string;
-}
+import { useState } from 'react';
+import type { Dispatch, SetStateAction } from 'react';
+import { Plus, Trash2, Bell, Mail, Zap, Clock, Pencil } from 'lucide-react';
+import { toast } from 'sonner';
+import type { AutomationRule } from '../lib/automation';
+import { TargetPicker } from './TargetPicker';
+import { PageHeader } from './PageHeader';
 
 interface AutomationPageProps {
   isDark: boolean;
+  rules: AutomationRule[];
+  setRules: Dispatch<SetStateAction<AutomationRule[]>>;
 }
 
-export function AutomationPage({ isDark }: AutomationPageProps) {
-  const [rules, setRules] = useState<AutomationRule[]>([
-    {
-      id: "1",
-      name: "Certificate Expiry Alert",
-      trigger: "Certificate expires in 30 days",
-      action: "Send email notification",
-      enabled: true,
-      schedule: "Daily at 9:00 AM"
-    },
-    {
-      id: "2",
-      name: "Weekly Domain Scan",
-      trigger: "Every Monday",
-      action: "Scan all domains",
-      enabled: true,
-      schedule: "Weekly on Monday"
-    },
-    {
-      id: "3",
-      name: "Grade Drop Alert",
-      trigger: "Security grade drops below B",
-      action: "Send Slack notification",
-      enabled: false,
-      schedule: "Real-time"
-    }
-  ]);
-
+export function AutomationPage({
+  isDark,
+  rules,
+  setRules,
+}: AutomationPageProps) {
   const [showNewRuleForm, setShowNewRuleForm] = useState(false);
+  const [editingRuleId, setEditingRuleId] = useState<string | null>(null);
   const [newRule, setNewRule] = useState({
-    name: "",
-    trigger: "",
-    action: "",
-    schedule: ""
+    name: '',
+    trigger: '',
+    action: '',
+    schedule: '',
+    targets: [] as string[],
   });
 
+  const resetRuleForm = () => {
+    setNewRule({
+      name: '',
+      trigger: '',
+      action: '',
+      schedule: '',
+      targets: [],
+    });
+    setEditingRuleId(null);
+  };
+
+  const handleToggleRuleForm = () => {
+    setShowNewRuleForm((prev) => {
+      const next = !prev;
+      if (!next) resetRuleForm();
+      return next;
+    });
+  };
+
   const handleToggleRule = (id: string) => {
-    setRules(rules.map(rule => 
-      rule.id === id ? { ...rule, enabled: !rule.enabled } : rule
-    ));
-    const rule = rules.find(r => r.id === id);
-    toast.success(`${rule?.name} ${rule?.enabled ? 'disabled' : 'enabled'}`);
+    setRules((prev) => {
+      const next = prev.map((r) =>
+        r.id === id ? { ...r, enabled: !r.enabled } : r
+      );
+      const changed = next.find((r) => r.id === id);
+      toast.success(
+        `${changed?.name} ${changed?.enabled ? 'enabled' : 'disabled'}`
+      );
+      return next;
+    });
   };
 
   const handleDeleteRule = (id: string) => {
-    const rule = rules.find(r => r.id === id);
-    setRules(rules.filter(rule => rule.id !== id));
-    toast.success(`${rule?.name} deleted`);
+    if (editingRuleId === id) {
+      setShowNewRuleForm(false);
+      resetRuleForm();
+    }
+
+    setRules((prev) => {
+      const rule = prev.find((r) => r.id === id);
+      const next = prev.filter((r) => r.id !== id);
+      toast.success(`${rule?.name ?? 'Rule'} deleted`);
+      return next;
+    });
   };
 
-  const handleAddRule = () => {
+  const handleEditRule = (id: string) => {
+    const rule = rules.find((r) => r.id === id);
+    if (!rule) return;
+
+    setEditingRuleId(id);
+    setNewRule({
+      name: rule.name ?? '',
+      trigger: rule.trigger ?? '',
+      action: rule.action ?? '',
+      schedule: rule.schedule ?? '',
+      targets: Array.isArray(rule.targets) ? rule.targets : [],
+    });
+    setShowNewRuleForm(true);
+  };
+
+  const handleSaveRule = () => {
     if (!newRule.name || !newRule.trigger || !newRule.action) {
-      toast.error("Please fill in all fields");
+      toast.error('Please fill in all fields');
       return;
     }
 
-    const rule: AutomationRule = {
-      id: Date.now().toString(),
-      name: newRule.name,
-      trigger: newRule.trigger,
-      action: newRule.action,
-      enabled: true,
-      schedule: newRule.schedule || "Manual"
-    };
+    if (!newRule.targets.length) {
+      toast.error('Please select at least one target (domain/IP)');
+      return;
+    }
 
-    setRules([...rules, rule]);
-    setNewRule({ name: "", trigger: "", action: "", schedule: "" });
+    if (editingRuleId) {
+      setRules((prev) =>
+        prev.map((rule) =>
+          rule.id === editingRuleId
+            ? {
+                ...rule,
+                name: newRule.name,
+                trigger: newRule.trigger,
+                action: newRule.action,
+                schedule: newRule.schedule || 'Manual',
+                targets: newRule.targets,
+              }
+            : rule
+        )
+      );
+      toast.success('Automation rule updated');
+    } else {
+      const rule: AutomationRule = {
+        id: Date.now().toString(),
+        name: newRule.name,
+        trigger: newRule.trigger,
+        action: newRule.action,
+        enabled: true,
+        schedule: newRule.schedule || 'Manual',
+        targets: newRule.targets,
+      };
+
+      setRules((prev) => [...prev, rule]);
+      toast.success('Automation rule created');
+    }
+
+    resetRuleForm();
     setShowNewRuleForm(false);
-    toast.success("Automation rule created");
   };
 
   return (
     <div className="p-8 space-y-8">
       {/* Header */}
-      <div className="flex items-start justify-between">
-        <div>
-          <h1
-            className="mb-2"
+      <PageHeader
+        title="Automation & Alerts"
+        subtitle="Set up automated scans and notifications for your domains"
+        isDark={isDark}
+        pageKey="automation"
+        actions={
+          <button
+            onClick={handleToggleRuleForm}
+            className="px-6 py-3 rounded-xl font-semibold transition-all duration-300 hover:scale-105 flex items-center gap-2 cursor-pointer"
             style={{
-              color: isDark ? '#FFFFFF' : '#0F172A',
-              fontSize: '36px',
-              fontWeight: 'bold',
-              fontFamily: "'JetBrains Mono', monospace",
+              background: 'linear-gradient(135deg, #22D3EE, #06B6D4)',
+              color: '#0F172A',
+              boxShadow: '0 0 20px rgba(34, 211, 238, 0.3)',
             }}
           >
-            Automation & Alerts
-          </h1>
-          <p style={{ color: isDark ? '#64748B' : '#94A3B8' }}>
-            Set up automated scans and notifications for your domains
-          </p>
-        </div>
-
-        <button
-          onClick={() => setShowNewRuleForm(!showNewRuleForm)}
-          className="px-6 py-3 rounded-xl font-semibold transition-all duration-300 hover:scale-105 flex items-center gap-2 mt-6 cursor-pointer"
-          style={{
-            background: 'linear-gradient(135deg, #22D3EE, #06B6D4)',
-            color: '#0F172A',
-            boxShadow: '0 0 20px rgba(34, 211, 238, 0.3)',
-          }}
-        >
-          <Plus className="w-5 h-5" />
-          New Rule
-        </button>
-      </div>
+            <Plus className="w-5 h-5" />
+            New Rule
+          </button>
+        }
+      />
 
       {/* New Rule Form */}
       {showNewRuleForm && (
@@ -137,12 +174,9 @@ export function AutomationPage({ isDark }: AutomationPageProps) {
         >
           <h3
             className="font-bold mb-4"
-            style={{
-              color: isDark ? '#FFFFFF' : '#0F172A',
-              fontSize: '20px',
-            }}
+            style={{ color: isDark ? '#FFFFFF' : '#0F172A', fontSize: '20px' }}
           >
-            Create New Automation Rule
+            {editingRuleId ? 'Edit Automation Rule' : 'Create New Automation Rule'}
           </h3>
 
           <div>
@@ -155,7 +189,9 @@ export function AutomationPage({ isDark }: AutomationPageProps) {
             <input
               type="text"
               value={newRule.name}
-              onChange={(e) => setNewRule({ ...newRule, name: e.target.value })}
+              onChange={(e) =>
+                setNewRule((p) => ({ ...p, name: e.target.value }))
+              }
               placeholder="e.g., SSL Expiry Warning"
               className="w-full px-4 py-3 rounded-xl border bg-transparent outline-none"
               style={{
@@ -167,6 +203,14 @@ export function AutomationPage({ isDark }: AutomationPageProps) {
             />
           </div>
 
+          <TargetPicker
+            isDark={isDark}
+            label="Targets (Domains / IPs)"
+            helperText="Select which domains/IPs this rule should apply to."
+            value={newRule.targets}
+            onChange={(targets) => setNewRule((p) => ({ ...p, targets }))}
+          />
+
           <div>
             <label
               className="block mb-2 text-sm font-semibold"
@@ -177,7 +221,7 @@ export function AutomationPage({ isDark }: AutomationPageProps) {
             <select
               value={newRule.trigger}
               onChange={(e) =>
-                setNewRule({ ...newRule, trigger: e.target.value })
+                setNewRule((p) => ({ ...p, trigger: e.target.value }))
               }
               className="w-full px-4 py-3 rounded-xl border bg-transparent outline-none"
               style={{
@@ -218,7 +262,7 @@ export function AutomationPage({ isDark }: AutomationPageProps) {
             <select
               value={newRule.action}
               onChange={(e) =>
-                setNewRule({ ...newRule, action: e.target.value })
+                setNewRule((p) => ({ ...p, action: e.target.value }))
               }
               className="w-full px-4 py-3 rounded-xl border bg-transparent outline-none"
               style={{
@@ -233,11 +277,6 @@ export function AutomationPage({ isDark }: AutomationPageProps) {
               <option value="Send email notification">
                 Send email notification
               </option>
-              <option value="Send Slack notification">
-                Send Slack notification
-              </option>
-              <option value="Send webhook">Send webhook</option>
-              <option value="Generate report">Generate report</option>
               <option value="Scan domain">Scan domain</option>
             </select>
           </div>
@@ -253,7 +292,7 @@ export function AutomationPage({ isDark }: AutomationPageProps) {
               type="text"
               value={newRule.schedule}
               onChange={(e) =>
-                setNewRule({ ...newRule, schedule: e.target.value })
+                setNewRule((p) => ({ ...p, schedule: e.target.value }))
               }
               placeholder="e.g., Daily at 9:00 AM"
               className="w-full px-4 py-3 rounded-xl border bg-transparent outline-none"
@@ -268,17 +307,20 @@ export function AutomationPage({ isDark }: AutomationPageProps) {
 
           <div className="flex gap-3 pt-2">
             <button
-              onClick={handleAddRule}
+              onClick={handleSaveRule}
               className="px-6 py-3 rounded-xl font-semibold transition-all duration-300 hover:scale-105"
               style={{
                 background: 'linear-gradient(135deg, #22D3EE, #06B6D4)',
                 color: '#0F172A',
               }}
             >
-              Create Rule
+              {editingRuleId ? 'Save Changes' : 'Create Rule'}
             </button>
             <button
-              onClick={() => setShowNewRuleForm(false)}
+              onClick={() => {
+                setShowNewRuleForm(false);
+                resetRuleForm();
+              }}
               className="px-6 py-3 rounded-xl font-semibold transition-all duration-300"
               style={{
                 backgroundColor: isDark
@@ -295,7 +337,9 @@ export function AutomationPage({ isDark }: AutomationPageProps) {
 
       {/* Rules List */}
       <div className="space-y-4">
-        {rules.map((rule) => (
+        {(Array.isArray(rules) ? rules : []).map((rule) => {
+          const safeTargets = Array.isArray(rule.targets) ? rule.targets : [];
+          return (
           <div
             key={rule.id}
             className="rounded-2xl p-6 border transition-all duration-300 hover:scale-[1.02]"
@@ -323,7 +367,11 @@ export function AutomationPage({ isDark }: AutomationPageProps) {
                       background: rule.enabled
                         ? 'rgba(34, 211, 238, 0.2)'
                         : 'rgba(100, 116, 139, 0.2)',
-                      border: `1px solid ${rule.enabled ? 'rgba(34, 211, 238, 0.3)' : 'rgba(100, 116, 139, 0.3)'}`,
+                      border: `1px solid ${
+                        rule.enabled
+                          ? 'rgba(34, 211, 238, 0.3)'
+                          : 'rgba(100, 116, 139, 0.3)'
+                      }`,
                     }}
                   >
                     <Zap
@@ -345,7 +393,7 @@ export function AutomationPage({ isDark }: AutomationPageProps) {
                       className="text-sm"
                       style={{ color: isDark ? '#64748B' : '#94A3B8' }}
                     >
-                      {rule.schedule}
+                      {rule.schedule} - {safeTargets.length} target(s)
                     </p>
                   </div>
                 </div>
@@ -375,11 +423,17 @@ export function AutomationPage({ isDark }: AutomationPageProps) {
                       {rule.action}
                     </span>
                   </div>
+
+                  <div
+                    className="text-xs"
+                    style={{ color: isDark ? '#64748B' : '#94A3B8' }}
+                  >
+                    Targets: {safeTargets.join(', ')}
+                  </div>
                 </div>
               </div>
 
               <div className="flex items-center gap-3">
-                {/* Toggle Switch */}
                 <button
                   onClick={() => handleToggleRule(rule.id)}
                   className="relative w-14 h-7 rounded-full transition-all duration-300"
@@ -393,16 +447,30 @@ export function AutomationPage({ isDark }: AutomationPageProps) {
                 >
                   <div
                     className="absolute top-0.5 w-6 h-6 rounded-full bg-white shadow-md transition-all duration-300"
-                    style={{
-                      left: rule.enabled ? 'calc(100% - 26px)' : '2px',
-                    }}
+                    style={{ left: rule.enabled ? 'calc(100% - 26px)' : '2px' }}
                   />
                 </button>
 
-                {/* Delete Button */}
+                <button
+                  onClick={() => handleEditRule(rule.id)}
+                  className="p-2 rounded-lg transition-all duration-200 hover:scale-110 cursor-pointer"
+                  style={{
+                    backgroundColor: isDark
+                      ? 'rgba(34, 211, 238, 0.12)'
+                      : 'rgba(8, 145, 178, 0.12)',
+                    border: isDark
+                      ? '1px solid rgba(34, 211, 238, 0.28)'
+                      : '1px solid rgba(8, 145, 178, 0.28)',
+                    color: isDark ? '#22D3EE' : '#0891B2',
+                  }}
+                  title="Edit rule"
+                >
+                  <Pencil className="w-4 h-4" />
+                </button>
+
                 <button
                   onClick={() => handleDeleteRule(rule.id)}
-                  className="p-2 rounded-lg transition-all duration-200 hover:scale-110"
+                  className="p-2 rounded-lg transition-all duration-200 hover:scale-110 cursor-pointer"
                   style={{
                     backgroundColor: 'rgba(239, 68, 68, 0.1)',
                     color: '#EF4444',
@@ -412,73 +480,36 @@ export function AutomationPage({ isDark }: AutomationPageProps) {
                 </button>
               </div>
             </div>
-          </div>
-        ))}
-      </div>
 
-      {/* Info Card */}
-      <div
-        className="rounded-2xl p-6 border"
-        style={{
-          background: isDark
-            ? 'rgba(15, 23, 42, 0.5)'
-            : 'rgba(255, 255, 255, 0.5)',
-          backdropFilter: 'blur(20px)',
-          borderColor: isDark
-            ? 'rgba(34, 211, 238, 0.2)'
-            : 'rgba(8, 145, 178, 0.2)',
-        }}
-      >
-        <div className="flex items-start gap-4">
-          <div
-            className="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0"
-            style={{
-              background: 'rgba(34, 211, 238, 0.2)',
-              border: '1px solid rgba(34, 211, 238, 0.3)',
-            }}
-          >
-            <Clock className="w-6 h-6" style={{ color: '#22D3EE' }} />
+            <div className="mt-4 flex items-start gap-4">
+              <div
+                className="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0"
+                style={{
+                  background: 'rgba(34, 211, 238, 0.2)',
+                  border: '1px solid rgba(34, 211, 238, 0.3)',
+                }}
+              >
+                <Clock className="w-6 h-6" style={{ color: '#22D3EE' }} />
+              </div>
+              <div>
+                <h4
+                  className="font-bold mb-1"
+                  style={{ color: isDark ? '#FFFFFF' : '#0F172A' }}
+                >
+                  Tip
+                </h4>
+                <p
+                  className="text-sm"
+                  style={{ color: isDark ? '#94A3B8' : '#64748B' }}
+                >
+                  This UI stores rules locally. Next step is wiring a real
+                  scheduler/runner (backend) to execute triggers.
+                </p>
+              </div>
+            </div>
           </div>
-          <div>
-            <h4
-              className="font-bold mb-2"
-              style={{ color: isDark ? '#FFFFFF' : '#0F172A' }}
-            >
-              Automation Tips
-            </h4>
-            <ul className="space-y-2">
-              <li className="flex items-start gap-2">
-                <span className="text-cyan-400">•</span>
-                <p
-                  className="text-sm"
-                  style={{ color: isDark ? '#94A3B8' : '#64748B' }}
-                >
-                  Set up alerts for certificates expiring in 30 days to ensure
-                  timely renewal
-                </p>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-cyan-400">•</span>
-                <p
-                  className="text-sm"
-                  style={{ color: isDark ? '#94A3B8' : '#64748B' }}
-                >
-                  Configure weekly scans to monitor your domain portfolio
-                  automatically
-                </p>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-cyan-400">•</span>
-                <p
-                  className="text-sm"
-                  style={{ color: isDark ? '#94A3B8' : '#64748B' }}
-                >
-                  Use webhooks to integrate with your existing DevOps workflows
-                </p>
-              </li>
-            </ul>
-          </div>
-        </div>
+          );
+        })}
       </div>
     </div>
   );

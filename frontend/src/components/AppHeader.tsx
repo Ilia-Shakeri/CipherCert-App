@@ -5,6 +5,8 @@ interface AppHeaderProps {
 }
 
 export default function AppHeader({ onRefresh }: AppHeaderProps) {
+  const appVersion = import.meta.env.VITE_APP_VERSION || 'dev';
+
   return (
     <header className="fixed top-0 left-0 right-0 z-50 flex h-10 items-center justify-between border-b border-border/40 bg-background/80 px-4 backdrop-blur-md drag">
       {/* LEFT: Logo / Title */}
@@ -16,7 +18,10 @@ export default function AppHeader({ onRefresh }: AppHeaderProps) {
       </div>
 
       {/* RIGHT: Refresh Button (Padding keeps it away from Windows controls) */}
-      <div className="flex items-center pr-36 no-drag">
+      <div className="flex items-center gap-3 pr-36 no-drag">
+        <span className="text-xs" style={{ color: 'rgba(148, 163, 184, 0.9)' }}>
+          v{appVersion}
+        </span>
         <button
           onClick={onRefresh}
           className="group relative inline-flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground transition-all hover:bg-accent hover:text-foreground active:scale-95 cursor-pointer"

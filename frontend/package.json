@@ -66,6 +66,7 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "electron": "concurrently \"npm run dev\" \"wait-on tcp:5173 && electron ../electron/main.js\""
+    "electron:main": "node ./scripts/run-electron.cjs",
+    "electron": "concurrently \"npm run dev\" \"wait-on tcp:5173 && npm run electron:main\""
   }
 }

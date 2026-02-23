@@ -5,6 +5,7 @@ import {
   Settings,
   Bell,
   Heart,
+  Info,
 } from 'lucide-react';
 import { GlassThemeToggle } from './GlassThemeToggle';
 import logoImage from '../assets/logo.png';
@@ -49,6 +50,11 @@ export function GlassSidebar({
       id: 'settings',
       label: 'Settings',
       icon: <Settings className="w-5 h-5" />,
+    },
+    {
+      id: 'about',
+      label: 'About',
+      icon: <Info className="w-5 h-5" />,
     },
   ];
 

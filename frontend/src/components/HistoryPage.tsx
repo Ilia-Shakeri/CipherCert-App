@@ -9,6 +9,7 @@ import {
 import { toast } from 'sonner';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import { PageHeader } from './PageHeader';
 
 interface HistoryItem {
   id: string;
@@ -252,85 +253,76 @@ export function HistoryPage({ isDark }: HistoryPageProps) {
   return (
     <div className="p-8 space-y-8">
       {/* Header */}
-      <div className="flex items-start justify-between no-print">
-        <div>
-          <h1
-            className="mb-2"
-            style={{
-              color: isDark ? '#FFFFFF' : '#0F172A',
-              fontSize: '36px',
-              fontWeight: 'bold',
-              fontFamily: "'JetBrains Mono', monospace",
-            }}
-          >
-            Scan History
-          </h1>
-          <p style={{ color: isDark ? '#64748B' : '#94A3B8' }}>
-            View all previously scanned domains and certificates
-          </p>
-        </div>
+      <div className="no-print">
+        <PageHeader
+          title="Scan History"
+          subtitle="View all previously scanned domains and certificates"
+          isDark={isDark}
+          pageKey="history"
+          actions={
+            <>
+              <button
+                onClick={handleExportExcel}
+                className="px-4 py-2 rounded-xl font-semibold transition-all duration-300 hover:scale-105 flex items-center gap-2 cursor-pointer"
+                style={{
+                  background: isDark
+                    ? 'rgba(34, 211, 238, 0.1)'
+                    : 'rgba(8, 145, 178, 0.1)',
+                  color: '#22D3EE',
+                  border: '1px solid rgba(34, 211, 238, 0.3)',
+                }}
+              >
+                <FileSpreadsheet className="w-4 h-4" />
+                Excel
+              </button>
 
-        <div className="flex gap-3 mt-6">
-          <button
-            onClick={handleExportExcel}
-            className="px-4 py-2 rounded-xl font-semibold transition-all duration-300 hover:scale-105 flex items-center gap-2 cursor-pointer"
-            style={{
-              background: isDark
-                ? 'rgba(34, 211, 238, 0.1)'
-                : 'rgba(8, 145, 178, 0.1)',
-              color: '#22D3EE',
-              border: '1px solid rgba(34, 211, 238, 0.3)',
-            }}
-          >
-            <FileSpreadsheet className="w-4 h-4" />
-            Excel
-          </button>
+              <button
+                onClick={handleExportPDF}
+                className="px-4 py-2 rounded-xl font-semibold transition-all duration-300 hover:scale-105 flex items-center gap-2 cursor-pointer"
+                style={{
+                  background: isDark
+                    ? 'rgba(34, 211, 238, 0.1)'
+                    : 'rgba(8, 145, 178, 0.1)',
+                  color: '#22D3EE',
+                  border: '1px solid rgba(34, 211, 238, 0.3)',
+                }}
+              >
+                <FileDown className="w-4 h-4" />
+                PDF
+              </button>
 
-          <button
-            onClick={handleExportPDF}
-            className="px-4 py-2 rounded-xl font-semibold transition-all duration-300 hover:scale-105 flex items-center gap-2 cursor-pointer"
-            style={{
-              background: isDark
-                ? 'rgba(34, 211, 238, 0.1)'
-                : 'rgba(8, 145, 178, 0.1)',
-              color: '#22D3EE',
-              border: '1px solid rgba(34, 211, 238, 0.3)',
-            }}
-          >
-            <FileDown className="w-4 h-4" />
-            PDF
-          </button>
+              <button
+                onClick={handleClearHistory}
+                className="px-4 py-2 rounded-xl font-semibold transition-all duration-300 hover:scale-105 flex items-center gap-2 cursor-pointer"
+                style={{
+                  background: 'rgba(239, 68, 68, 0.1)',
+                  color: '#EF4444',
+                  border: '1px solid rgba(239, 68, 68, 0.3)',
+                }}
+              >
+                <Trash2 className="w-4 h-4" />
+                Clear
+              </button>
 
-          <button
-            onClick={handleClearHistory}
-            className="px-4 py-2 rounded-xl font-semibold transition-all duration-300 hover:scale-105 flex items-center gap-2 cursor-pointer"
-            style={{
-              background: 'rgba(239, 68, 68, 0.1)',
-              color: '#EF4444',
-              border: '1px solid rgba(239, 68, 68, 0.3)',
-            }}
-          >
-            <Trash2 className="w-4 h-4" />
-            Clear
-          </button>
-
-          <button
-            onClick={handleRefresh}
-            disabled={loading}
-            className="px-4 py-2 rounded-xl font-semibold transition-all duration-300 hover:scale-105 flex items-center gap-2 cursor-pointer"
-            style={{
-              background: isDark
-                ? 'rgba(34, 211, 238, 0.1)'
-                : 'rgba(8, 145, 178, 0.1)',
-              color: '#22D3EE',
-              border: '1px solid rgba(34, 211, 238, 0.3)',
-              opacity: loading ? 0.7 : 1,
-            }}
-          >
-            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-            {loading ? 'Refreshing...' : 'Refresh'}
-          </button>
-        </div>
+              <button
+                onClick={handleRefresh}
+                disabled={loading}
+                className="px-4 py-2 rounded-xl font-semibold transition-all duration-300 hover:scale-105 flex items-center gap-2 cursor-pointer"
+                style={{
+                  background: isDark
+                    ? 'rgba(34, 211, 238, 0.1)'
+                    : 'rgba(8, 145, 178, 0.1)',
+                  color: '#22D3EE',
+                  border: '1px solid rgba(34, 211, 238, 0.3)',
+                  opacity: loading ? 0.7 : 1,
+                }}
+              >
+                <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+                {loading ? 'Refreshing...' : 'Refresh'}
+              </button>
+            </>
+          }
+        />
       </div>
 
       {/* Search Bar */}

@@ -10,14 +10,16 @@ import {
   XCircle,
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { PageHeader } from './PageHeader';
 
 interface BulkScanPageProps {
   isDark: boolean;
+  maxConcurrent: number;
 }
 
 type BulkState = 'idle' | 'preview' | 'scanning' | 'done';
 
-export function BulkScanPage({ isDark }: BulkScanPageProps) {
+export function BulkScanPage({ isDark, maxConcurrent }: BulkScanPageProps) {
   const [state, setState] = useState<BulkState>('idle');
   const [dragActive, setDragActive] = useState(false);
 
@@ -160,20 +162,29 @@ export function BulkScanPage({ isDark }: BulkScanPageProps) {
     const domainRegex =
       /^(?!.*@)[a-zA-Z0-9][a-zA-Z0-9-]{0,61}[a-zA-Z0-9](?:\.[a-zA-Z]{2,})+$/;
 
-    for (let i = 0; i < fileContent.length; i++) {
-      const target = fileContent[i];
-      setProgress((p) => ({ ...p, current: i + 1 }));
+    const targets = fileContent.map((t) => t.trim()).filter(Boolean);
+    const total = targets.length;
 
+    // Respect user setting; cap to prevent accidental overload
+    const concurrency = Math.max(1, Math.min(maxConcurrent || 1, 25));
+
+    setProgress({ current: 0, total });
+
+    let nextIndex = 0;
+    let completed = 0;
+
+    const scanOne = async (target: string) => {
       const isValid =
         ipv4Regex.test(target) ||
         ipv6Regex.test(target) ||
         domainRegex.test(target);
+
       if (!isValid) {
         setResults((r) => ({
           ...r,
           failed: [...r.failed, `${target} (Invalid Format)`],
         }));
-        continue;
+        return;
       }
 
       try {
@@ -189,7 +200,21 @@ export function BulkScanPage({ isDark }: BulkScanPageProps) {
       } catch {
         setResults((r) => ({ ...r, failed: [...r.failed, target] }));
       }
-    }
+    };
+
+    const worker = async () => {
+      while (true) {
+        const idx = nextIndex++;
+        if (idx >= total) break;
+
+        await scanOne(targets[idx]);
+
+        completed += 1;
+        setProgress({ current: completed, total });
+      }
+    };
+
+    await Promise.all(Array.from({ length: concurrency }, () => worker()));
 
     toast.success('Bulk scan finished!');
     setState('done');
@@ -302,13 +327,22 @@ export function BulkScanPage({ isDark }: BulkScanPageProps) {
 
   return (
     <div
-      // Fixed page height. No global scroll. Content sits inside 32px safe padding.
       className="w-full h-full overflow-hidden"
       style={{
         padding: PADDING,
         paddingTop: PADDING + TOP_SAFE,
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 16,
       }}
     >
+      <PageHeader
+        title="Bulk Scan"
+        subtitle="Upload a .txt file and scan multiple domains or IPs in one run"
+        isDark={isDark}
+        pageKey="bulk-scan"
+      />
+
       <style
         dangerouslySetInnerHTML={{
           __html: `${themedScrollbar('cyan')}\n${themedScrollbar('green')}\n${themedScrollbar('red')}`,
@@ -328,7 +362,7 @@ export function BulkScanPage({ isDark }: BulkScanPageProps) {
 
       {/* STAGE: one stable container for ALL states (no resizing, no jumping) */}
       <div
-        className="w-full h-full overflow-hidden relative"
+        className="w-full flex-1 overflow-hidden relative"
         style={{
           ...boxStyle,
           ...stageBg,
@@ -472,7 +506,10 @@ export function BulkScanPage({ isDark }: BulkScanPageProps) {
                         : '0 0 26px rgba(34,211,238,0.16)',
                     }}
                   >
-                    <Upload className="w-16 h-16" style={{ color: '#22D3EE' }} />
+                    <Upload
+                      className="w-16 h-16"
+                      style={{ color: '#22D3EE' }}
+                    />
                   </div>
 
                   <div
