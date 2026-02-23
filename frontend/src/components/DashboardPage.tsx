@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Search, Scan, Shield, AlertTriangle, TrendingUp } from "lucide-react";
 import { StatusCard } from "./StatusCard";
+import { PageHeader } from './PageHeader';
 import { toast } from "sonner";
 
 interface DomainResult {
@@ -87,22 +88,12 @@ export function DashboardPage({ isDark }: DashboardPageProps) {
     <div className="p-8 space-y-8">
       {/* Header with Search */}
       <div className="space-y-6">
-        <div>
-          <h1
-            className="mb-2"
-            style={{
-              color: isDark ? '#FFFFFF' : '#0F172A',
-              fontSize: '36px',
-              fontWeight: 'bold',
-              fontFamily: "'JetBrains Mono', monospace",
-            }}
-          >
-            Dashboard
-          </h1>
-          <p style={{ color: isDark ? '#64748B' : '#94A3B8' }}>
-            Real-time SSL certificate monitoring and domain intelligence
-          </p>
-        </div>
+        <PageHeader
+          title="Dashboard"
+          subtitle="Real-time SSL certificate monitoring and domain intelligence"
+          isDark={isDark}
+          pageKey="dashboard"
+        />
 
         {/* Search Bar */}
         <div

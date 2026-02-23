@@ -10,6 +10,7 @@ import {
   XCircle,
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { PageHeader } from './PageHeader';
 
 interface BulkScanPageProps {
   isDark: boolean;
@@ -326,13 +327,22 @@ export function BulkScanPage({ isDark, maxConcurrent }: BulkScanPageProps) {
 
   return (
     <div
-      // Fixed page height. No global scroll. Content sits inside 32px safe padding.
       className="w-full h-full overflow-hidden"
       style={{
         padding: PADDING,
         paddingTop: PADDING + TOP_SAFE,
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 16,
       }}
     >
+      <PageHeader
+        title="Bulk Scan"
+        subtitle="Upload a .txt file and scan multiple domains or IPs in one run"
+        isDark={isDark}
+        pageKey="bulk-scan"
+      />
+
       <style
         dangerouslySetInnerHTML={{
           __html: `${themedScrollbar('cyan')}\n${themedScrollbar('green')}\n${themedScrollbar('red')}`,
@@ -352,7 +362,7 @@ export function BulkScanPage({ isDark, maxConcurrent }: BulkScanPageProps) {
 
       {/* STAGE: one stable container for ALL states (no resizing, no jumping) */}
       <div
-        className="w-full h-full overflow-hidden relative"
+        className="w-full flex-1 overflow-hidden relative"
         style={{
           ...boxStyle,
           ...stageBg,

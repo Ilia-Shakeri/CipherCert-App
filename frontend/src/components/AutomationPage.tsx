@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import type { Dispatch, SetStateAction } from 'react';
 import { Plus, Trash2, Bell, Mail, Zap, Clock, Pencil } from 'lucide-react';
-import { toast } from 'sonner@2.0.3';
+import { toast } from 'sonner';
 import type { AutomationRule } from '../lib/automation';
 import { TargetPicker } from './TargetPicker';
+import { PageHeader } from './PageHeader';
 
 interface AutomationPageProps {
   isDark: boolean;
@@ -136,37 +137,26 @@ export function AutomationPage({
   return (
     <div className="p-8 space-y-8">
       {/* Header */}
-      <div className="flex items-start justify-between">
-        <div>
-          <h1
-            className="mb-2"
+      <PageHeader
+        title="Automation & Alerts"
+        subtitle="Set up automated scans and notifications for your domains"
+        isDark={isDark}
+        pageKey="automation"
+        actions={
+          <button
+            onClick={handleToggleRuleForm}
+            className="px-6 py-3 rounded-xl font-semibold transition-all duration-300 hover:scale-105 flex items-center gap-2 cursor-pointer"
             style={{
-              color: isDark ? '#FFFFFF' : '#0F172A',
-              fontSize: '36px',
-              fontWeight: 'bold',
-              fontFamily: "'JetBrains Mono', monospace",
+              background: 'linear-gradient(135deg, #22D3EE, #06B6D4)',
+              color: '#0F172A',
+              boxShadow: '0 0 20px rgba(34, 211, 238, 0.3)',
             }}
           >
-            Automation & Alerts
-          </h1>
-          <p style={{ color: isDark ? '#64748B' : '#94A3B8' }}>
-            Set up automated scans and notifications for your domains
-          </p>
-        </div>
-
-        <button
-          onClick={handleToggleRuleForm}
-          className="px-6 py-3 rounded-xl font-semibold transition-all duration-300 hover:scale-105 flex items-center gap-2 mt-6 cursor-pointer"
-          style={{
-            background: 'linear-gradient(135deg, #22D3EE, #06B6D4)',
-            color: '#0F172A',
-            boxShadow: '0 0 20px rgba(34, 211, 238, 0.3)',
-          }}
-        >
-          <Plus className="w-5 h-5" />
-          New Rule
-        </button>
-      </div>
+            <Plus className="w-5 h-5" />
+            New Rule
+          </button>
+        }
+      />
 
       {/* New Rule Form */}
       {showNewRuleForm && (

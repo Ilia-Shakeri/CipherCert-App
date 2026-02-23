@@ -8,7 +8,8 @@ import { HistoryPage } from './components/HistoryPage';
 import { AutomationPage } from './components/AutomationPage';
 import { DonatePage } from './components/DonatePage';
 import { SettingsPage } from './components/SettingsPage';
-import { Toaster } from 'sonner@2.0.3';
+import { AboutPage } from './components/AboutPage';
+import { Toaster } from 'sonner';
 import AppHeader from './components/AppHeader';
 
 import {
@@ -96,6 +97,8 @@ export default function App() {
             setSettings={setSettings}
           />
         );
+      case 'about':
+        return <AboutPage isDark={isDark} />;
       default:
         return <DashboardPage isDark={isDark} />;
     }

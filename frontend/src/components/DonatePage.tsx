@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Heart, Copy, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { toast } from 'sonner@2.0.3';
+import { toast } from 'sonner';
 
 // Import your crypto logos from the assets directory
 // Adjust the path based on where your assets folder is located

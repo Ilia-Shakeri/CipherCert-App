@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, screen } = require('electron');
+const { app, BrowserWindow, ipcMain, screen, shell } = require('electron');
 const path = require('path');
 const { spawn } = require('child_process');
 const fs = require('fs');
@@ -137,4 +137,17 @@ app.on('activate', () => {
   if (mainWindow === null) {
     createWindow();
   }
+});
+
+ipcMain.handle('get-app-info', () => ({
+  appVersion: app.getVersion(),
+  electronVersion: process.versions.electron || 'unknown',
+  nodeVersion: process.versions.node || 'unknown',
+  platform: process.platform,
+}));
+
+ipcMain.handle('open-external', async (_event, targetUrl) => {
+  if (typeof targetUrl !== 'string' || !targetUrl.trim()) return false;
+  await shell.openExternal(targetUrl);
+  return true;
 });

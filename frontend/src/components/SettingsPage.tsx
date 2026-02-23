@@ -1,9 +1,10 @@
 import { useMemo } from 'react';
 import type { Dispatch, SetStateAction } from 'react';
-import { toast } from 'sonner@2.0.3';
+import { toast } from 'sonner';
 import { Bell, Database, Send } from 'lucide-react';
 import type { AppSettings } from '../lib/settings';
 import { TargetPicker } from './TargetPicker';
+import { PageHeader } from './PageHeader';
 
 interface SettingsPageProps {
   isDark: boolean;
@@ -136,36 +137,26 @@ export function SettingsPage({
   return (
     <div className="p-8 space-y-8">
       {/* Header */}
-      <div className="flex items-start justify-between">
-        <div>
-          <h1
-            className="mb-2"
+      <PageHeader
+        title="Settings"
+        subtitle="Configure automation + notifications"
+        isDark={isDark}
+        pageKey="settings"
+        showHelp={false}
+        actions={
+          <button
+            onClick={handleSave}
+            className="px-6 py-3 rounded-xl font-semibold transition-all duration-300 hover:scale-105 cursor-pointer"
             style={{
-              color: isDark ? '#FFFFFF' : '#0F172A',
-              fontSize: '36px',
-              fontWeight: 'bold',
-              fontFamily: "'JetBrains Mono', monospace",
+              background: 'linear-gradient(135deg, #22D3EE, #06B6D4)',
+              color: '#0F172A',
+              boxShadow: '0 0 20px rgba(34, 211, 238, 0.3)',
             }}
           >
-            Settings
-          </h1>
-          <p style={{ color: isDark ? '#64748B' : '#94A3B8' }}>
-            Configure automation + notifications
-          </p>
-        </div>
-
-        <button
-          onClick={handleSave}
-          className="px-6 py-3 rounded-xl font-semibold transition-all duration-300 hover:scale-105 mt-6 cursor-pointer"
-          style={{
-            background: 'linear-gradient(135deg, #22D3EE, #06B6D4)',
-            color: '#0F172A',
-            boxShadow: '0 0 20px rgba(34, 211, 238, 0.3)',
-          }}
-        >
-          Save Changes
-        </button>
-      </div>
+            Save Changes
+          </button>
+        }
+      />
 
       {/* Notifications: Email only */}
       <SettingSection icon={Bell} title="Email Notifications">
