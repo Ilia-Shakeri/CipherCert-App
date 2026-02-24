@@ -12,7 +12,6 @@ import {
   CheckCircle2,
   Loader2,
   Play,
-  Search,
   Square,
   Upload,
   X,
@@ -255,7 +254,8 @@ function ActionButton({
     <button
       onClick={onClick}
       disabled={disabled}
-      className={`rounded-full font-semibold transition-all duration-300 hover:-translate-y-1 hover:shadow-xl active:scale-[0.98] disabled:opacity-50 disabled:hover:translate-y-0 disabled:hover:shadow-none flex items-center justify-center gap-2 cursor-pointer ${
+      data-variant={variant}
+      className={`bulk-cyber-btn rounded-full font-semibold transition-all duration-300 hover:-translate-y-1 active:scale-[0.98] disabled:opacity-50 disabled:hover:translate-y-0 disabled:hover:shadow-none flex items-center justify-center gap-2 cursor-pointer ${
         size === 'lg' ? 'px-8 py-4 text-base min-w-[200px]' : 'px-4 py-2.5'
       }`}
       style={styleByVariant[variant]}
@@ -353,7 +353,7 @@ function ResultBox({
       }}
     >
       <div
-        className="px-4 py-2.5 flex items-center justify-between"
+        className="px-4 py-2 flex items-center justify-between"
         style={{
           borderBottom: isSuccess
             ? '1px solid rgba(16,185,129,0.2)'
@@ -362,12 +362,12 @@ function ResultBox({
       >
         <div className="flex items-center gap-2">
           {isSuccess ? (
-            <CheckCircle2 className="w-4 h-4" style={{ color: '#10B981' }} />
+            <CheckCircle2 className="w-6 h-6" style={{ color: '#10B981' }} />
           ) : (
-            <XCircle className="w-4 h-4" style={{ color: '#EF4444' }} />
+            <XCircle className="w-6 h-6" style={{ color: '#EF4444' }} />
           )}
           <span
-            className="font-semibold"
+            className="font-bold"
             style={{ color: isSuccess ? '#10B981' : '#EF4444' }}
           >
             {title}
@@ -375,7 +375,7 @@ function ResultBox({
         </div>
 
         <span
-          className="text-xs font-semibold px-2 py-1 rounded-lg"
+          className="text-s font-semibold px-2 py-1 rounded-lg"
           style={{
             color: isSuccess ? '#10B981' : '#EF4444',
             background: isSuccess
@@ -438,17 +438,18 @@ function ResultBox({
                       : isDark
                         ? 'rgba(127,29,29,0.22)'
                         : 'rgba(254,226,226,0.8)',
+                    paddingLeft: 15,
                   }}
                 >
                   <div
-                    className="font-semibold text-[0.95rem] leading-6 break-all"
+                    className="font-semibold text-[0.95rem] leading-6 break-all pl-1"
                     style={{ color: isDark ? '#E2E8F0' : '#0F172A' }}
                     title={row.target}
                   >
                     {row.target}
                   </div>
                   <div
-                    className="text-xs mt-1 leading-5 break-words"
+                    className="text-xs mt-1 leading-5 break-words pl-1"
                     style={{
                       color: isSuccess
                         ? isDark
@@ -494,7 +495,6 @@ export function BulkScanPage({ isDark, maxConcurrent }: BulkScanPageProps) {
   const [tick, setTick] = useState(0);
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
-  const searchInputRef = useRef<HTMLInputElement | null>(null);
   const resultsRef = useRef<BulkScanResult[]>([]);
   const incomingRef = useRef<BulkScanResult[]>([]);
   const seenResultKeysRef = useRef<Set<string>>(new Set());
@@ -988,7 +988,9 @@ export function BulkScanPage({ isDark, maxConcurrent }: BulkScanPageProps) {
   const filteredFailedRows = useMemo(
     () =>
       normalizedSearch
-        ? failedRows.filter((row) => row.target.toLowerCase().includes(normalizedSearch))
+        ? failedRows.filter((row) =>
+            row.target.toLowerCase().includes(normalizedSearch)
+          )
         : failedRows,
     [failedRows, normalizedSearch]
   );
@@ -1007,6 +1009,40 @@ export function BulkScanPage({ isDark, maxConcurrent }: BulkScanPageProps) {
               0% { transform: scale(0.96); opacity: 0.55; }
               50% { transform: scale(1.05); opacity: 0.95; }
               100% { transform: scale(0.96); opacity: 0.55; }
+            }
+            @keyframes bulkSweep {
+              0% { transform: translateX(-140%) skewX(-22deg); opacity: 0; }
+              40% { opacity: .35; }
+              100% { transform: translateX(170%) skewX(-22deg); opacity: 0; }
+            }
+            .bulk-cyber-btn {
+              position: relative;
+              overflow: hidden;
+              isolation: isolate;
+            }
+            .bulk-cyber-btn::after {
+              content: '';
+              position: absolute;
+              inset: -20% -40%;
+              background: linear-gradient(105deg, transparent 30%, rgba(255,255,255,.25) 50%, transparent 70%);
+              pointer-events: none;
+              opacity: 0;
+            }
+            .bulk-cyber-btn:hover::after {
+              animation: bulkSweep .7s ease-out;
+            }
+            .bulk-cyber-btn[data-variant='primary']:hover { box-shadow: 0 0 0 1px rgba(34,211,238,.5), 0 14px 30px rgba(34,211,238,.32); }
+            .bulk-cyber-btn[data-variant='secondary']:hover { box-shadow: 0 0 0 1px rgba(34,211,238,.45), 0 12px 24px rgba(34,211,238,.22); }
+            .bulk-cyber-btn[data-variant='danger']:hover { box-shadow: 0 0 0 1px rgba(239,68,68,.5), 0 12px 24px rgba(239,68,68,.28); }
+            .bulk-cyber-btn[data-variant='reset']:hover { box-shadow: 0 0 0 1px rgba(248,113,113,.5), 0 14px 28px rgba(239,68,68,.28); }
+            .bulk-cyber-btn[data-variant='ghost']:hover { box-shadow: 0 0 0 1px rgba(148,163,184,.35), 0 10px 20px rgba(148,163,184,.2); }
+            .bulk-cyber-icon-btn:hover {
+              transform: translateY(-1px);
+              box-shadow: 0 0 0 1px rgba(34,211,238,.42), 0 10px 22px rgba(34,211,238,.24);
+            }
+            .bulk-cyber-icon-btn-danger:hover {
+              transform: translateY(-1px);
+              box-shadow: 0 0 0 1px rgba(239,68,68,.45), 0 10px 22px rgba(239,68,68,.24);
             }
             .bulk-scroll-success { scrollbar-width: thin; scrollbar-color: rgba(16,185,129,0.65) rgba(16,185,129,0.12); }
             .bulk-scroll-success::-webkit-scrollbar { width: 10px; }
@@ -1060,15 +1096,20 @@ export function BulkScanPage({ isDark, maxConcurrent }: BulkScanPageProps) {
       >
         <div className="flex items-center justify-between gap-4 flex-wrap mb-4">
           <div className="flex items-center gap-3">
-            <div
-              className="w-12 h-12 rounded-xl flex items-center justify-center"
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={phase === 'running'}
+              className="bulk-cyber-icon-btn w-12 h-12 rounded-xl flex items-center justify-center cursor-pointer transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
               style={{
                 background: 'rgba(34,211,238,0.14)',
                 border: '1px solid rgba(34,211,238,0.3)',
               }}
+              title="Upload files"
+              aria-label="Upload files"
             >
               <Upload className="w-5 h-5" style={{ color: '#22D3EE' }} />
-            </div>
+            </button>
             <div>
               <h3
                 className="font-semibold"
@@ -1129,7 +1170,7 @@ export function BulkScanPage({ isDark, maxConcurrent }: BulkScanPageProps) {
 
                   <button
                     onClick={() => removeUploadedFile(file.id)}
-                    className="p-2 rounded-lg transition-all duration-200 hover:scale-105 cursor-pointer"
+                    className="bulk-cyber-icon-btn-danger p-2 rounded-lg transition-all duration-200 cursor-pointer"
                     style={{
                       background: 'rgba(239,68,68,0.12)',
                       border: '1px solid rgba(239,68,68,0.28)',
@@ -1173,25 +1214,7 @@ export function BulkScanPage({ isDark, maxConcurrent }: BulkScanPageProps) {
         <div className="flex items-start justify-between gap-4 flex-wrap">
           <div>
             <div className="flex items-center gap-2.5 w-full max-w-2xl">
-              <button
-                type="button"
-                onClick={() => searchInputRef.current?.focus()}
-                className="flex items-center justify-center w-12 h-12 rounded-xl transition-all duration-200 cursor-pointer shrink-0"
-                style={{
-                  background: isDark ? 'rgba(34,211,238,0.16)' : 'rgba(8,145,178,0.12)',
-                  border: isDark
-                    ? '1px solid rgba(34,211,238,0.34)'
-                    : '1px solid rgba(8,145,178,0.28)',
-                  color: isDark ? '#67E8F9' : '#0E7490',
-                  marginRight: 5,
-                }}
-                title="Focus search"
-                aria-label="Focus search"
-              >
-                <Search className="w-4 h-4" />
-              </button>
               <input
-                ref={searchInputRef}
                 type="text"
                 value={searchTerm}
                 onChange={(event) => setSearchTerm(event.target.value)}

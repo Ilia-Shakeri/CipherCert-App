@@ -366,7 +366,7 @@ export function HistoryPage({ isDark }: HistoryPageProps) {
         }}
       >
         <div className="overflow-x-auto">
-          <table className="w-full">
+          <table className="w-full min-w-[820px] table-auto">
             <thead>
               <tr
                 style={{
@@ -379,37 +379,37 @@ export function HistoryPage({ isDark }: HistoryPageProps) {
                 }}
               >
                 <th
-                  className="px-6 py-4 text-left text-sm font-semibold"
+                  className="px-2 md:px-4 lg:px-6 py-4 text-left text-sm font-semibold whitespace-nowrap"
                   style={{ color: isDark ? '#94A3B8' : '#64748B' }}
                 >
                   Timestamp
                 </th>
                 <th
-                  className="px-2 py-4 text-left text-sm font-semibold"
+                  className="px-2 md:px-3 lg:px-4 py-4 text-left text-sm font-semibold"
                   style={{ color: isDark ? '#94A3B8' : '#64748B' }}
                 >
                   Domain
                 </th>
                 <th
-                  className="px-6 py-4 text-left text-sm font-semibold"
+                  className="px-2 md:px-4 lg:px-6 py-4 text-left text-sm font-semibold whitespace-nowrap w-32"
                   style={{ color: isDark ? '#94A3B8' : '#64748B' }}
                 >
                   Status
                 </th>
                 <th
-                  className="px-6 py-4 text-left text-sm font-semibold"
+                  className="px-2 md:px-4 lg:px-6 py-4 text-left text-sm font-semibold whitespace-nowrap w-20"
                   style={{ color: isDark ? '#94A3B8' : '#64748B' }}
                 >
                   Grade
                 </th>
                 <th
-                  className="px-6 py-4 text-left text-sm font-semibold"
+                  className="px-2 md:px-4 lg:px-6 py-4 text-left text-sm font-semibold"
                   style={{ color: isDark ? '#94A3B8' : '#64748B' }}
                 >
                   Issuer
                 </th>
                 <th
-                  className="px-6 py-4 text-left text-sm font-semibold"
+                  className="px-2 md:px-4 lg:px-6 py-4 text-left text-sm font-semibold whitespace-nowrap"
                   style={{ color: isDark ? '#94A3B8' : '#64748B' }}
                 >
                   Expiry Date
@@ -445,22 +445,25 @@ export function HistoryPage({ isDark }: HistoryPageProps) {
                     }}
                   >
                     <td
-                      className="px-6 py-4 font-mono text-sm"
+                      className="px-2 md:px-4 lg:px-6 py-4 font-mono text-sm whitespace-nowrap"
                       style={{ color: isDark ? '#64748B' : '#94A3B8' }}
                     >
                       {item.timestamp}
                     </td>
                     <td
-                      className="px-2 py-4 font-medium"
+                      className="px-2 md:px-3 lg:px-4 py-4 font-medium text-m max-w-[22rem] truncate"
                       style={{
                         color: isDark ? '#FFFFFF' : '#0F172A',
-                        fontFamily: "'JetBrains Mono', monospace",
+                        fontFamily: "'Segoe UI', 'SF Pro Text', 'Helvetica Neue', Arial, sans-serif",
+                        fontWeight: 600,
+                        letterSpacing: '0.01em',
                       }}
+                      title={item.domain}
                     >
                       {item.domain}
                     </td>
-                    <td className="px-6 py-4">{getStatusBadge(item.status)}</td>
-                    <td className="px-6 py-4">
+                    <td className="px-2 md:px-4 lg:px-6 py-4 whitespace-nowrap">{getStatusBadge(item.status)}</td>
+                    <td className="px-2 md:px-4 lg:px-6 py-4 whitespace-nowrap">
                       <span
                         className="px-3 py-1 rounded-lg font-bold"
                         style={{
@@ -476,13 +479,14 @@ export function HistoryPage({ isDark }: HistoryPageProps) {
                       </span>
                     </td>
                     <td
-                      className="px-6 py-4"
+                      className="px-2 md:px-4 lg:px-6 py-4 text-sm max-w-[16rem] truncate"
                       style={{ color: isDark ? '#94A3B8' : '#64748B' }}
+                      title={item.issuer}
                     >
                       {item.issuer}
                     </td>
                     <td
-                      className="px-6 py-4"
+                      className="px-2 md:px-4 lg:px-6 py-4 whitespace-nowrap"
                       style={{ color: isDark ? '#94A3B8' : '#64748B' }}
                     >
                       {item.expiryDate}
